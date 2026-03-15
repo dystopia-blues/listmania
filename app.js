@@ -131,9 +131,37 @@ function renderMyList() {
         <div class="item-title">${escHtml(item.title)}</div>
         <div class="item-meta">${escHtml(item.meta)}</div>
       </div>
-      <button class="item-remove" data-idx="${i}" title="Remove">×</button>
+      <div class="item-actions">
+        <button class="move-btn move-up" data-idx="${i}" title="Move up" ${i === 0 ? 'disabled' : ''}>
+          <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M5 8V2M2 5l3-3 3 3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+        <button class="move-btn move-down" data-idx="${i}" title="Move down" ${i === items.length - 1 ? 'disabled' : ''}>
+          <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M5 2v6M2 5l3 3 3-3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+        <button class="item-remove" data-idx="${i}" title="Remove">×</button>
+      </div>
     </div>
   `).join('');
+
+  grid.querySelectorAll('.move-up').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const i = +btn.dataset.idx;
+      if (i === 0) return;
+      const list = lists[currentCat];
+      [list[i - 1], list[i]] = [list[i], list[i - 1]];
+      renderMyList();
+    });
+  });
+
+  grid.querySelectorAll('.move-down').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const i = +btn.dataset.idx;
+      const list = lists[currentCat];
+      if (i === list.length - 1) return;
+      [list[i], list[i + 1]] = [list[i + 1], list[i]];
+      renderMyList();
+    });
+  });
 
   grid.querySelectorAll('.item-remove').forEach(btn => {
     btn.addEventListener('click', () => {
@@ -219,8 +247,9 @@ function _flipRender(grid) {
 function initDrag(grid) {
 
   // ── Mouse drag ──
-  // No hold delay on desktop — native drag is intentional enough.
-  // Drop-line only moves when insertPos actually changes, preventing flicker.
+  // All dragover/drop handling is on the items only — NOT on the grid element.
+  // Grid-level dragover was the cause of the drop-line snapping to the bottom,
+  // because dragover bubbles from children up to the grid on every mouse move.
 
   grid.querySelectorAll('.list-item').forEach(el => {
     el.addEventListener('dragstart', e => {
@@ -228,7 +257,8 @@ function initDrag(grid) {
       _insertPos = null;
       _committed = false;
       e.dataTransfer.effectAllowed = 'move';
-      requestAnimationFrame(() => el.classList.add('dragging'));
+      // Small delay so browser ghost image captures the un-faded element
+      setTimeout(() => el.classList.add('dragging'), 0);
     });
 
     el.addEventListener('dragend', () => {
@@ -240,15 +270,21 @@ function initDrag(grid) {
 
     el.addEventListener('dragover', e => {
       e.preventDefault();
+      e.stopPropagation(); // prevent bubbling to grid
       e.dataTransfer.dropEffect = 'move';
+
       const targetIdx = +el.dataset.idx;
-      const rect      = el.getBoundingClientRect();
-      const after     = e.clientY > rect.top + rect.height / 2;
-      const newPos    = after ? targetIdx + 1 : targetIdx;
-      if (newPos === _insertPos) return; // no change — skip DOM write
+      if (targetIdx === _dragIdx) return; // hovering own row — don't move line
+
+      const rect   = el.getBoundingClientRect();
+      const after  = e.clientY > rect.top + rect.height / 2;
+      const newPos = after ? targetIdx + 1 : targetIdx;
+      if (newPos === _insertPos) return; // position unchanged — skip DOM write
       _insertPos = newPos;
+
       const items  = _getItems(grid);
-      _showLine(grid, items[after ? targetIdx + 1 : targetIdx] || null);
+      const nextEl = items[after ? targetIdx + 1 : targetIdx] || null;
+      _showLine(grid, nextEl);
     });
 
     el.addEventListener('drop', e => {
@@ -256,20 +292,6 @@ function initDrag(grid) {
       e.stopPropagation();
       _commitDrop(grid);
     });
-  });
-
-  grid.addEventListener('dragover', e => {
-    e.preventDefault();
-    e.dataTransfer.dropEffect = 'move';
-    if (e.target === grid) {
-      const newPos = _getItems(grid).length;
-      if (newPos !== _insertPos) { _insertPos = newPos; _showLine(grid, null); }
-    }
-  });
-
-  grid.addEventListener('drop', e => {
-    e.preventDefault();
-    _commitDrop(grid);
   });
 
   // ── Touch drag — 250ms hold to activate so scroll works freely ──
