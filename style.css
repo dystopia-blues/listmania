@@ -87,7 +87,7 @@ h1 { font-size: 20px; font-weight: 600; letter-spacing: -0.3px; margin-bottom: 4
 
 /* ── Drag and drop ── */
 .drag-handle { color: var(--text3); cursor: grab; padding: 4px 2px; flex-shrink: 0; display: flex; align-items: center; opacity: 0; transition: opacity 0.13s; }
-.drag-handle:active { cursor: grabbing; }
+.drag-handle:active { cursor: grabbing; color: var(--text); opacity: 1; }
 .list-item:hover .drag-handle { opacity: 1; }
 .list-item.dragging { opacity: 0.3; }
 

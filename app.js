@@ -154,171 +154,209 @@ function renderMyList() {
 }
 
 // ── Drag-and-drop ─────────────────────────────────────────────────────────
-// A floating <div class="drop-line"> is inserted between items to show
-// the drop target — no border hacks, so rounded corners stay clean.
-// After drop, cards animate to their new positions via a FLIP transition.
+
+// Single persistent drop-line — never re-created, just moved/removed.
+const DROP_LINE = document.createElement('div');
+DROP_LINE.className = 'drop-line';
+
+let _dragIdx   = null;
+let _insertPos = null;
+let _committed = false; // guard against double-commit (item drop + grid drop)
+
+function _removeLine() {
+  if (DROP_LINE.parentNode) DROP_LINE.parentNode.removeChild(DROP_LINE);
+}
+
+function _showLine(grid, beforeEl) {
+  if (beforeEl) grid.insertBefore(DROP_LINE, beforeEl);
+  else grid.appendChild(DROP_LINE);
+}
+
+function _getItems(grid) {
+  return [...grid.querySelectorAll('.list-item')];
+}
+
+function _commitDrop(grid) {
+  if (_committed) return;
+  _committed = true;
+  _removeLine();
+
+  if (_dragIdx !== null && _insertPos !== null) {
+    const list = lists[currentCat];
+    const item = list.splice(_dragIdx, 1)[0];
+    const at   = _insertPos > _dragIdx ? _insertPos - 1 : _insertPos;
+    list.splice(at, 0, item);
+    _flipRender(grid);
+  }
+
+  _dragIdx   = null;
+  _insertPos = null;
+}
+
+function _flipRender(grid) {
+  // Snapshot Y positions of every item by its current data-idx
+  const before = new Map(
+    _getItems(grid).map(el => [+el.dataset.idx, el.getBoundingClientRect().top])
+  );
+
+  renderMyList();
+
+  // Animate from old positions
+  _getItems(grid).forEach((el, newI) => {
+    const oldTop = before.get(newI);
+    if (oldTop == null) return;
+    const delta = oldTop - el.getBoundingClientRect().top;
+    if (Math.abs(delta) < 2) return;
+    el.style.transition = 'none';
+    el.style.transform  = `translateY(${delta}px)`;
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      el.style.transition = 'transform 0.22s cubic-bezier(0.25,0.46,0.45,0.94)';
+      el.style.transform  = 'translateY(0)';
+    }));
+  });
+}
 
 function initDrag(grid) {
-  let dragIdx   = null;
-  let insertPos = null;
-
-  const dropLine = document.createElement('div');
-  dropLine.className = 'drop-line';
-
-  function getItems() {
-    return [...grid.querySelectorAll('.list-item')];
-  }
-
-  function showLine(beforeEl) {
-    if (beforeEl) grid.insertBefore(dropLine, beforeEl);
-    else grid.appendChild(dropLine);
-  }
-
-  function removeLine() {
-    if (dropLine.parentNode) dropLine.parentNode.removeChild(dropLine);
-  }
-
-  function commitDrop() {
-    removeLine();
-    if (dragIdx === null || insertPos === null) { dragIdx = null; insertPos = null; return; }
-
-    const list = lists[currentCat];
-    const item = list.splice(dragIdx, 1)[0];
-    const at   = insertPos > dragIdx ? insertPos - 1 : insertPos;
-    list.splice(at, 0, item);
-
-    flipRender();
-    dragIdx   = null;
-    insertPos = null;
-  }
-
-  // ── Mouse drag ──
+  // ── Mouse drag — only activate after 250ms hold ──
 
   grid.querySelectorAll('.list-item').forEach(el => {
+    let holdTimer  = null;
+    let holdReady  = false;
+
+    el.addEventListener('mousedown', () => {
+      holdReady = false;
+      holdTimer = setTimeout(() => { holdReady = true; }, 250);
+    });
+
+    el.addEventListener('mouseup', () => {
+      clearTimeout(holdTimer);
+      holdReady = false;
+    });
+
     el.addEventListener('dragstart', e => {
-      dragIdx = +el.dataset.idx;
+      if (!holdReady) { e.preventDefault(); return; }
+      _dragIdx   = +el.dataset.idx;
+      _insertPos = null;
+      _committed = false;
       e.dataTransfer.effectAllowed = 'move';
       requestAnimationFrame(() => el.classList.add('dragging'));
     });
 
     el.addEventListener('dragend', () => {
-      removeLine();
-      getItems().forEach(r => r.classList.remove('dragging'));
-      dragIdx = null; insertPos = null;
+      // dragend fires even if drop didn't land on a valid target — clean up
+      _removeLine();
+      _getItems(grid).forEach(r => r.classList.remove('dragging'));
+      _dragIdx   = null;
+      _insertPos = null;
+      _committed = false;
     });
 
     el.addEventListener('dragover', e => {
       e.preventDefault();
       e.dataTransfer.dropEffect = 'move';
-      const items     = getItems();
+      const items     = _getItems(grid);
       const targetIdx = +el.dataset.idx;
       const rect      = el.getBoundingClientRect();
       const after     = e.clientY > rect.top + rect.height / 2;
-      insertPos       = after ? targetIdx + 1 : targetIdx;
+      _insertPos      = after ? targetIdx + 1 : targetIdx;
       const nextEl    = items[after ? targetIdx + 1 : targetIdx] || null;
-      if (dropLine.nextSibling !== nextEl || !dropLine.parentNode) showLine(nextEl);
-    });
-
-    el.addEventListener('dragleave', e => {
-      // Only remove line if leaving the grid entirely
-      if (!grid.contains(e.relatedTarget)) removeLine();
+      _showLine(grid, nextEl);
     });
 
     el.addEventListener('drop', e => {
       e.preventDefault();
-      commitDrop();
+      e.stopPropagation(); // prevent grid's drop firing too
+      _commitDrop(grid);
     });
   });
 
+  // Grid-level dragover handles the empty-space below all items
   grid.addEventListener('dragover', e => {
     e.preventDefault();
-    if (e.target === grid) { insertPos = getItems().length; showLine(null); }
+    e.dataTransfer.dropEffect = 'move';
+    // Only act when dragging over the grid background, not over a child item
+    if (e.target === grid) {
+      _insertPos = _getItems(grid).length;
+      _showLine(grid, null);
+    }
   });
 
-  grid.addEventListener('drop', e => { e.preventDefault(); commitDrop(); });
+  grid.addEventListener('drop', e => {
+    e.preventDefault();
+    _commitDrop(grid);
+  });
 
-  // ── Touch drag ──
+  // ── Touch drag — only activate after 250ms hold ──
 
-  let touchEl     = null;
-  let touchClone  = null;
-  let touchOffY   = 0;
+  let touchEl    = null;
+  let touchClone = null;
+  let touchOffY  = 0;
+  let touchTimer = null;
+  let touchReady = false;
 
   grid.querySelectorAll('.list-item').forEach(el => {
     el.addEventListener('touchstart', e => {
-      const touch  = e.touches[0];
-      touchEl      = el;
-      dragIdx      = +el.dataset.idx;
-      const rect   = el.getBoundingClientRect();
-      touchOffY    = touch.clientY - rect.top;
+      touchReady = false;
+      const touch = e.touches[0];
 
-      touchClone = el.cloneNode(true);
-      Object.assign(touchClone.style, {
-        position: 'fixed', left: rect.left + 'px', top: rect.top + 'px',
-        width: rect.width + 'px', zIndex: 999, pointerEvents: 'none',
-        opacity: '0.85', boxShadow: '0 8px 24px rgba(0,0,0,0.15)',
-      });
-      touchClone.classList.add('touch-clone');
-      document.body.appendChild(touchClone);
-      requestAnimationFrame(() => el.classList.add('dragging'));
+      touchTimer = setTimeout(() => {
+        touchReady = true;
+        touchEl    = el;
+        _dragIdx   = +el.dataset.idx;
+        _insertPos = null;
+        _committed = false;
+        const rect = el.getBoundingClientRect();
+        touchOffY  = touch.clientY - rect.top;
+
+        touchClone = el.cloneNode(true);
+        Object.assign(touchClone.style, {
+          position: 'fixed', left: rect.left + 'px', top: rect.top + 'px',
+          width: rect.width + 'px', zIndex: 999, pointerEvents: 'none',
+          opacity: '0.85', boxShadow: '0 8px 24px rgba(0,0,0,0.15)',
+        });
+        document.body.appendChild(touchClone);
+        el.classList.add('dragging');
+
+        // Light haptic feedback if available
+        navigator.vibrate?.(30);
+      }, 250);
     }, { passive: true });
 
     el.addEventListener('touchmove', e => {
+      if (!touchReady) {
+        // Not yet held long enough — cancel the timer so scroll works freely
+        clearTimeout(touchTimer);
+        return;
+      }
       e.preventDefault();
       const touch = e.touches[0];
       if (touchClone) touchClone.style.top = (touch.clientY - touchOffY) + 'px';
 
-      // Find element under finger (hide clone first)
       touchClone.style.display = 'none';
       const target = document.elementFromPoint(touch.clientX, touch.clientY);
       touchClone.style.display = '';
 
       const hoverItem = target?.closest?.('.list-item');
       if (hoverItem && hoverItem !== touchEl) {
-        const items     = getItems();
-        const rect      = hoverItem.getBoundingClientRect();
-        const after     = touch.clientY > rect.top + rect.height / 2;
-        const ti        = +hoverItem.dataset.idx;
-        insertPos       = after ? ti + 1 : ti;
-        showLine(items[after ? ti + 1 : ti] || null);
+        const items  = _getItems(grid);
+        const rect   = hoverItem.getBoundingClientRect();
+        const after  = touch.clientY > rect.top + rect.height / 2;
+        const ti     = +hoverItem.dataset.idx;
+        _insertPos   = after ? ti + 1 : ti;
+        _showLine(grid, items[after ? ti + 1 : ti] || null);
       }
     }, { passive: false });
 
     el.addEventListener('touchend', () => {
+      clearTimeout(touchTimer);
+      if (!touchReady) { touchReady = false; return; }
       if (touchClone) { touchClone.remove(); touchClone = null; }
       touchEl?.classList.remove('dragging');
-      touchEl = null;
-      commitDrop();
+      touchEl    = null;
+      touchReady = false;
+      _commitDrop(grid);
     });
   });
-
-  // ── FLIP animation after drop ──
-
-  function flipRender() {
-    // Snapshot current positions before re-render
-    const items = getItems();
-    const before = new Map(items.map(el => [+el.dataset.idx, el.getBoundingClientRect().top]));
-
-    renderMyList();
-
-    // Animate new items from their old visual positions
-    const newItems = [...grid.querySelectorAll('.list-item')];
-    newItems.forEach((el, newI) => {
-      // Best effort: match by new index to old index via data
-      const oldTop = before.get(newI);
-      if (oldTop == null) return;
-      const newTop = el.getBoundingClientRect().top;
-      const delta  = oldTop - newTop;
-      if (Math.abs(delta) < 2) return;
-      el.style.transition = 'none';
-      el.style.transform  = `translateY(${delta}px)`;
-      requestAnimationFrame(() => {
-        requestAnimationFrame(() => {
-          el.style.transition = 'transform 0.22s cubic-bezier(0.25,0.46,0.45,0.94)';
-          el.style.transform  = 'translateY(0)';
-        });
-      });
-    });
-  }
 }
 
 // ── Render: Discover ──────────────────────────────────────────────────────
