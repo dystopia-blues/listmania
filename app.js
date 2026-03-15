@@ -120,14 +120,14 @@ function escHtml(str) {
 
 // ── Render: My List ───────────────────────────────────────────────────────
 
-function renderMyList() {
+function renderMyList(animMap) {
   const items = lists[currentCat];
   document.getElementById('list-label').textContent = `Top 10 ${currentCat}`;
 
   const grid = document.getElementById('my-list');
   grid.innerHTML = items.map((item, i) => `
-    <div class="list-item" draggable="true" data-idx="${i}">
-      <div class="drag-handle" title="Drag to reorder">
+    <div class="list-item" data-i="${i}">
+      <div class="drag-handle" data-h="${i}" title="Drag to reorder">
         <svg width="12" height="16" viewBox="0 0 12 16" fill="none">
           <circle cx="4" cy="4"  r="1.5" fill="currentColor"/>
           <circle cx="4" cy="8"  r="1.5" fill="currentColor"/>
@@ -144,47 +144,45 @@ function renderMyList() {
         <div class="item-meta">${escHtml(item.meta)}</div>
       </div>
       <div class="item-actions">
-        <button class="move-btn move-up" data-idx="${i}" title="Move up" ${i === 0 ? 'disabled' : ''}>
-          <svg width="14" height="14" viewBox="0 0 10 10" fill="none"><path d="M5 8V2M2 5l3-3 3 3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <button class="move-btn" data-u="${i}" title="Move up" ${i === 0 ? 'disabled' : ''}>
+          <svg width="14" height="14" viewBox="0 0 10 10" fill="none"><path d="M5 8V2M2 5l3-3 3 3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </button>
-        <button class="move-btn move-down" data-idx="${i}" title="Move down" ${i === items.length - 1 ? 'disabled' : ''}>
-          <svg width="14" height="14" viewBox="0 0 10 10" fill="none"><path d="M5 2v6M2 5l3 3 3-3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <button class="move-btn" data-d="${i}" title="Move down" ${i === items.length - 1 ? 'disabled' : ''}>
+          <svg width="14" height="14" viewBox="0 0 10 10" fill="none"><path d="M5 2v6M2 5l3 3 3-3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </button>
-        <button class="item-remove" data-idx="${i}" title="Remove">×</button>
+        <button class="item-remove" data-x="${i}" title="Remove">×</button>
       </div>
     </div>
   `).join('');
 
-  grid.querySelectorAll('.move-up').forEach(btn => {
+  if (animMap) {
+    grid.querySelectorAll('.list-item').forEach(el => {
+      const cls = animMap[+el.dataset.i];
+      if (cls) el.classList.add(cls);
+    });
+  }
+
+  grid.querySelectorAll('[data-u]').forEach(btn => {
     btn.addEventListener('click', () => {
-      const i = +btn.dataset.idx;
+      const i = +btn.dataset.u;
       if (i === 0) return;
-      const list = lists[currentCat];
-      [list[i - 1], list[i]] = [list[i], list[i - 1]];
-      renderMyList();
-      // Animate the two swapped items
-      const newItems = grid.querySelectorAll('.list-item');
-      newItems[i - 1]?.classList.add('item-moved-up');
-      newItems[i]?.classList.add('item-moved-down');
+      [lists[currentCat][i - 1], lists[currentCat][i]] = [lists[currentCat][i], lists[currentCat][i - 1]];
+      renderMyList({ [i - 1]: 'item-moved-up', [i]: 'item-moved-down' });
     });
   });
 
-  grid.querySelectorAll('.move-down').forEach(btn => {
+  grid.querySelectorAll('[data-d]').forEach(btn => {
     btn.addEventListener('click', () => {
-      const i = +btn.dataset.idx;
-      const list = lists[currentCat];
-      if (i === list.length - 1) return;
-      [list[i], list[i + 1]] = [list[i + 1], list[i]];
-      renderMyList();
-      const newItems = grid.querySelectorAll('.list-item');
-      newItems[i]?.classList.add('item-moved-down');
-      newItems[i + 1]?.classList.add('item-moved-up');
+      const i = +btn.dataset.d;
+      if (i === lists[currentCat].length - 1) return;
+      [lists[currentCat][i], lists[currentCat][i + 1]] = [lists[currentCat][i + 1], lists[currentCat][i]];
+      renderMyList({ [i]: 'item-moved-down', [i + 1]: 'item-moved-up' });
     });
   });
 
-  grid.querySelectorAll('.item-remove').forEach(btn => {
+  grid.querySelectorAll('[data-x]').forEach(btn => {
     btn.addEventListener('click', () => {
-      lists[currentCat].splice(+btn.dataset.idx, 1);
+      lists[currentCat].splice(+btn.dataset.x, 1);
       renderMyList();
     });
   });
@@ -200,194 +198,106 @@ function renderMyList() {
   updateProfileCounts();
 }
 
-// ── Drag-and-drop ─────────────────────────────────────────────────────────
+// ── Drag-and-drop (pointer events — no HTML5 drag API) ────────────────────
+// Uses pointerdown/pointermove/pointerup on the drag handle.
+// Drop position is calculated by iterating item bounding rects directly,
+// avoiding elementFromPoint unreliability when a ghost overlaps the list.
 
-// Single persistent drop-line — never re-created, just moved/removed.
 const DROP_LINE = document.createElement('div');
 DROP_LINE.className = 'drop-line';
-
-let _dragIdx   = null;
-let _insertPos = null;
-let _committed = false; // guard against double-commit (item drop + grid drop)
 
 function _removeLine() {
   if (DROP_LINE.parentNode) DROP_LINE.parentNode.removeChild(DROP_LINE);
 }
 
-function _showLine(grid, beforeEl) {
-  if (beforeEl) grid.insertBefore(DROP_LINE, beforeEl);
-  else grid.appendChild(DROP_LINE);
-}
-
-function _getItems(grid) {
-  return [...grid.querySelectorAll('.list-item')];
-}
-
-function _commitDrop(grid) {
-  if (_committed) return;
-  _committed = true;
-  _removeLine();
-
-  if (_dragIdx !== null && _insertPos !== null) {
-    const list = lists[currentCat];
-    const item = list.splice(_dragIdx, 1)[0];
-    const at   = _insertPos > _dragIdx ? _insertPos - 1 : _insertPos;
-    list.splice(at, 0, item);
-    _flipRender(grid);
-  }
-
-  _dragIdx   = null;
-  _insertPos = null;
-}
-
-function _flipRender(grid) {
-  // Snapshot old Y positions keyed by data-idx before re-render
-  const before = new Map(
-    _getItems(grid).map(el => [+el.dataset.idx, el.getBoundingClientRect().top])
-  );
-
-  renderMyList();
-
-  // Tag each item with a directional animation class based on which way it moved
-  _getItems(grid).forEach((el, newI) => {
-    const oldTop = before.get(newI);
-    if (oldTop == null) return;
-    const newTop = el.getBoundingClientRect().top;
-    const delta  = newTop - oldTop;
-    if (Math.abs(delta) < 2) return;
-    el.classList.add(delta < 0 ? 'item-moved-up' : 'item-moved-down');
-  });
-}
-
 function initDrag(grid) {
-
-  // ── Mouse drag ──
-  // All dragover/drop handling is on the items only — NOT on the grid element.
-  // Grid-level dragover was the cause of the drop-line snapping to the bottom,
-  // because dragover bubbles from children up to the grid on every mouse move.
-
-  grid.querySelectorAll('.list-item').forEach(el => {
-    el.addEventListener('dragstart', e => {
-      _dragIdx   = +el.dataset.idx;
-      _insertPos = null;
-      _committed = false;
-      e.dataTransfer.effectAllowed = 'move';
-      // Small delay so browser ghost image captures the un-faded element
-      setTimeout(() => el.classList.add('dragging'), 0);
-    });
-
-    el.addEventListener('dragend', () => {
-      _removeLine();
-      _getItems(grid).forEach(r => r.classList.remove('dragging'));
-      if (!_committed) { _dragIdx = null; _insertPos = null; }
-      _committed = false;
-    });
-
-    el.addEventListener('dragover', e => {
+  grid.querySelectorAll('[data-h]').forEach(handle => {
+    handle.addEventListener('pointerdown', e => {
+      if (e.button !== undefined && e.button !== 0) return;
       e.preventDefault();
-      e.stopPropagation(); // prevent bubbling to grid
-      e.dataTransfer.dropEffect = 'move';
+      handle.setPointerCapture(e.pointerId);
 
-      const targetIdx = +el.dataset.idx;
-      if (targetIdx === _dragIdx) return; // hovering own row — don't move line
+      const row     = handle.closest('.list-item');
+      const dragIdx = +row.dataset.i;
+      const rowRect = row.getBoundingClientRect();
+      const offY    = e.clientY - rowRect.top;
+      const offX    = e.clientX - rowRect.left;
 
-      const rect   = el.getBoundingClientRect();
-      const after  = e.clientY > rect.top + rect.height / 2;
-      const newPos = after ? targetIdx + 1 : targetIdx;
-      if (newPos === _insertPos) return; // position unchanged — skip DOM write
-      _insertPos = newPos;
+      // Ghost: clone the row and fix it to body
+      const ghost = row.cloneNode(true);
+      ghost.style.cssText = `
+        position:fixed; pointer-events:none; z-index:9999;
+        width:${rowRect.width}px; height:${rowRect.height}px;
+        top:${rowRect.top}px; left:${rowRect.left}px;
+        border-radius:var(--radius-md);
+        box-shadow:0 8px 28px rgba(0,0,0,0.18);
+        opacity:0.92;
+        background:var(--color-background-primary);
+        border:0.5px solid var(--color-border-secondary);
+      `;
+      document.body.appendChild(ghost);
+      row.classList.add('dragging');
 
-      const items  = _getItems(grid);
-      const nextEl = items[after ? targetIdx + 1 : targetIdx] || null;
-      _showLine(grid, nextEl);
-    });
+      let insertPos = null;
 
-    el.addEventListener('drop', e => {
-      e.preventDefault();
-      e.stopPropagation();
-      _commitDrop(grid);
-    });
-  });
-
-  // ── Touch drag — 250ms hold to activate so scroll works freely ──
-
-  let touchEl     = null;
-  let touchClone  = null;
-  let touchOffY   = 0;
-  let touchTimer  = null;
-  let touchReady  = false;
-  let touchStartY = 0;
-
-  grid.querySelectorAll('.list-item').forEach(el => {
-    el.addEventListener('touchstart', e => {
-      const touch = e.touches[0];
-      touchStartY = touch.clientY;
-      touchReady  = false;
-
-      touchTimer = setTimeout(() => {
-        touchReady = true;
-        touchEl    = el;
-        _dragIdx   = +el.dataset.idx;
-        _insertPos = null;
-        _committed = false;
-        const rect = el.getBoundingClientRect();
-        touchOffY  = touch.clientY - rect.top;
-
-        touchClone = el.cloneNode(true);
-        Object.assign(touchClone.style, {
-          position: 'fixed', left: rect.left + 'px', top: rect.top + 'px',
-          width: rect.width + 'px', zIndex: 999, pointerEvents: 'none',
-          opacity: '0.85', boxShadow: '0 8px 24px rgba(0,0,0,0.15)',
-        });
-        document.body.appendChild(touchClone);
-        el.classList.add('dragging');
-        navigator.vibrate?.(30);
-      }, 250);
-    }, { passive: true });
-
-    el.addEventListener('touchmove', e => {
-      const touch = e.touches[0];
-      if (!touchReady) {
-        if (Math.abs(touch.clientY - touchStartY) > 8) clearTimeout(touchTimer);
-        return;
+      function getItemRects() {
+        return [...grid.querySelectorAll('.list-item')].map(el => ({
+          el,
+          idx: +el.dataset.i,
+          mid: (el.getBoundingClientRect().top + el.getBoundingClientRect().bottom) / 2,
+        }));
       }
-      e.preventDefault();
-      if (touchClone) touchClone.style.top = (touch.clientY - touchOffY) + 'px';
 
-      touchClone.style.display = 'none';
-      const target = document.elementFromPoint(touch.clientX, touch.clientY);
-      touchClone.style.display = '';
+      function updateLine(clientY) {
+        const rects  = getItemRects();
+        let best     = null;
+        let bestPos  = rects.length > 0 ? rects[rects.length - 1].idx + 1 : 0;
 
-      const hoverItem = target?.closest?.('.list-item');
-      if (hoverItem && hoverItem !== touchEl) {
-        const items  = _getItems(grid);
-        const rect   = hoverItem.getBoundingClientRect();
-        const after  = touch.clientY > rect.top + rect.height / 2;
-        const ti     = +hoverItem.dataset.idx;
-        const newPos = after ? ti + 1 : ti;
-        if (newPos !== _insertPos) {
-          _insertPos = newPos;
-          _showLine(grid, items[after ? ti + 1 : ti] || null);
+        for (const r of rects) {
+          if (clientY <= r.mid) {
+            best    = r.el;
+            bestPos = r.idx;
+            break;
+          }
         }
+
+        if (bestPos === insertPos) return;
+        insertPos = bestPos;
+        if (best) grid.insertBefore(DROP_LINE, best);
+        else      grid.appendChild(DROP_LINE);
       }
-    }, { passive: false });
 
-    el.addEventListener('touchend', () => {
-      clearTimeout(touchTimer);
-      if (!touchReady) { touchReady = false; return; }
-      if (touchClone) { touchClone.remove(); touchClone = null; }
-      touchEl?.classList.remove('dragging');
-      touchEl = null; touchReady = false;
-      _commitDrop(grid);
-    });
+      handle.addEventListener('pointermove', e => {
+        ghost.style.top  = (e.clientY - offY) + 'px';
+        ghost.style.left = (e.clientX - offX) + 'px';
+        updateLine(e.clientY);
+      });
 
-    el.addEventListener('touchcancel', () => {
-      clearTimeout(touchTimer);
-      if (touchClone) { touchClone.remove(); touchClone = null; }
-      touchEl?.classList.remove('dragging');
-      touchEl = null; touchReady = false;
-      _removeLine();
-      _dragIdx = null; _insertPos = null; _committed = false;
+      handle.addEventListener('pointerup', () => {
+        ghost.remove();
+        row.classList.remove('dragging');
+        _removeLine();
+
+        if (insertPos !== null) {
+          const list = lists[currentCat];
+          const item = list.splice(dragIdx, 1)[0];
+          const at   = insertPos > dragIdx ? insertPos - 1 : insertPos;
+          list.splice(at, 0, item);
+
+          // Build animation map
+          const animMap = {};
+          const lo = Math.min(dragIdx, at);
+          const hi = Math.max(dragIdx, at);
+          for (let n = lo; n <= hi; n++) {
+            animMap[n] = n === at
+              ? (dragIdx > at ? 'item-moved-up' : 'item-moved-down')
+              : (dragIdx < at ? 'item-moved-up' : 'item-moved-down');
+          }
+          renderMyList(animMap);
+        }
+
+        insertPos = null;
+      });
     });
   });
 }
