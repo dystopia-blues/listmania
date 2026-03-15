@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Listmania</title>
+  <link rel="stylesheet" href="style.css"/>
+</head>
+<body>
+  <div class="app">
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+      <div class="logo">List<span class="logo-muted">mania</span></div>
+      <nav>
+        <div class="nav-item active" data-view="my-lists">
+          <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><rect x="2" y="3" width="12" height="1.5" rx="0.75" fill="currentColor"/><rect x="2" y="7" width="9" height="1.5" rx="0.75" fill="currentColor"/><rect x="2" y="11" width="11" height="1.5" rx="0.75" fill="currentColor"/></svg>
+          My lists
+        </div>
+        <div class="nav-item" data-view="discover">
+          <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.5"/><path d="M10 5.5L7 8.5 5.5 7" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+          Discover
+        </div>
+        <div class="nav-item" data-view="matches">
+          <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+            <path stroke-width="1.2" d="M4 11.5 C2.5 11 1.5 9.5 1.5 8 C1.5 6.8 2 5.8 3 5.2 C3 3.5 4.2 2.2 5.8 2 C6.8 1.9 7.7 2.3 8.3 3 C9 2.5 9.9 2.5 10.6 3 C11.8 3.7 12.5 5 12.5 6.3 C13.5 6.8 14 7.7 14 8.8 C14 10.3 12.8 11.5 11.5 11.5 Z"/>
+            <path stroke-width="0.9" d="M5 5.5 C5.8 4.8 7 5.2 7.5 6"/>
+            <path stroke-width="0.9" d="M7.5 6 C8.2 6.8 7.8 8 7 8.5"/>
+            <path stroke-width="0.9" d="M9 4.5 C9.8 5.2 9.5 6.5 8.8 7"/>
+            <path stroke-width="0.9" d="M8.8 7 C9.5 7.5 10.5 7.2 10.8 8"/>
+            <path stroke-width="0.9" d="M5.5 8.5 C6.2 9.2 7.5 9 8 9.8"/>
+          </svg>
+          Matches
+        </div>
+        <div class="nav-item" data-view="profile">
+          <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="5.5" r="2.5" stroke="currentColor" stroke-width="1.3"/><path d="M2 13C2 10.5 4.5 8.5 8 8.5C11.5 8.5 14 10.5 14 13" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+          Profile
+        </div>
+      </nav>
+      <div class="sidebar-footer">
+        <div class="avatar">RL</div>
+        <div>
+          <div class="profile-name">Rob Larkin</div>
+          <div class="profile-handle">@Rob</div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- MAIN -->
+    <main class="main">
+
+      <!-- MY LISTS -->
+      <section class="view active" id="view-my-lists">
+        <div class="view-header">
+          <div>
+            <h1>My lists</h1>
+            <p class="page-sub">Curate your top 10s and share your taste</p>
+          </div>
+          <div class="export-wrap" id="export-wrap">
+            <button class="export-btn" id="export-btn">
+              <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M6.5 1v7M3.5 5l3 3 3-3M1.5 10v1.5a.5.5 0 00.5.5h9a.5.5 0 00.5-.5V10" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              Export
+            </button>
+            <div class="export-menu" id="export-menu">
+              <button class="export-option" data-fmt="json">JSON</button>
+              <button class="export-option" data-fmt="yaml">YAML</button>
+              <button class="export-option" data-fmt="md">Markdown</button>
+            </div>
+          </div>
+        </div>
+        <div class="tabs" id="my-tabs">
+          <button class="tab active" data-cat="books">Books</button>
+          <button class="tab" data-cat="films">Films</button>
+          <button class="tab" data-cat="albums">Albums</button>
+          <button class="tab" data-cat="tv">TV shows</button>
+        </div>
+        <div class="section-label" id="list-label">Top 10 books</div>
+        <div class="list-grid" id="my-list"></div>
+        <div class="add-area" id="add-area">
+          <div class="search-wrap">
+            <svg class="search-icon" width="14" height="14" viewBox="0 0 14 14" fill="none"><circle cx="6" cy="6" r="4.5" stroke="currentColor" stroke-width="1.2"/><path d="M9.5 9.5L12 12" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+            <input id="search-input" type="text" placeholder="Search to add…" autocomplete="off"/>
+            <div class="spinner" id="spinner"></div>
+          </div>
+          <div class="autocomplete" id="autocomplete"></div>
+          <p class="limit-note" id="limit-note">List is full — remove an item to add another</p>
+        </div>
+      </section>
+
+      <!-- DISCOVER -->
+      <section class="view" id="view-discover">
+        <h1>Discover</h1>
+        <p class="page-sub">Explore what others are loving right now</p>
+        <div class="tabs" id="disc-tabs">
+          <button class="tab active" data-cat="all">All</button>
+          <button class="tab" data-cat="books">Books</button>
+          <button class="tab" data-cat="films">Films</button>
+          <button class="tab" data-cat="albums">Albums</button>
+          <button class="tab" data-cat="tv">TV shows</button>
+        </div>
+        <div class="discover-grid" id="discover-grid"></div>
+      </section>
+
+      <!-- MATCHES -->
+      <section class="view" id="view-matches">
+        <h1>Matches</h1>
+        <p class="page-sub">People who think like you</p>
+        <div class="section-label">Top taste matches</div>
+        <div class="match-list" id="match-cards"></div>
+      </section>
+
+      <!-- PROFILE -->
+      <section class="view" id="view-profile">
+        <div class="profile-hero">
+          <div class="avatar avatar-lg">RL</div>
+          <div>
+            <div class="profile-hero-name">Rob Larkin</div>
+            <div class="profile-hero-handle">@Rob · joined March 2026</div>
+          </div>
+        </div>
+        <div class="stats-row">
+          <div class="stat"><span class="stat-n" id="stat-lists">4</span><span class="stat-l">lists</span></div>
+          <div class="stat"><span class="stat-n">47</span><span class="stat-l">followers</span></div>
+          <div class="stat"><span class="stat-n">31</span><span class="stat-l">following</span></div>
+          <div class="stat"><span class="stat-n">12</span><span class="stat-l">matches</span></div>
+        </div>
+        <div class="section-label">My lists</div>
+        <div class="profile-lists">
+          <div class="pl-card"><div class="pl-icon">📚</div><div class="pl-title">Books</div><div class="pl-count" id="pc-books">8 items</div></div>
+          <div class="pl-card"><div class="pl-icon">🎬</div><div class="pl-title">Films</div><div class="pl-count" id="pc-films">5 items</div></div>
+          <div class="pl-card"><div class="pl-icon">🎵</div><div class="pl-title">Albums</div><div class="pl-count" id="pc-albums">10 items</div></div>
+          <div class="pl-card"><div class="pl-icon">📺</div><div class="pl-title">TV shows</div><div class="pl-count" id="pc-tv">5 items</div></div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+  <script src="app.js"></script>
+</body>
+</html>
