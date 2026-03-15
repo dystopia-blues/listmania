@@ -57,13 +57,25 @@ const discoverData = [
   { name: 'Lena M.', handle: '@lena', color: 'green', cat: 'books', items: ['Dune', 'I Am Legend', 'The Stars My Destination', 'More Than Human', 'The Demolished Man'] },
   { name: 'Dev P.', handle: '@devp', color: 'amber', cat: 'films', items: ['The Thing', 'Solaris', 'Primer', 'Moon', 'Ex Machina'] },
   { name: 'Caro B.', handle: '@caro', color: 'red', cat: 'tv', items: ['Dark', 'Fringe', 'Halt and Catch Fire', 'The Leftovers', 'Station Eleven'] },
+  { name: 'James O.', handle: '@jamo', color: 'blue', cat: 'albums', items: ['The Rise and Fall of Ziggy Stardust', 'Horses', 'Unknown Pleasures', 'Marquee Moon', 'Remain in Light'] },
+  { name: 'Nadia F.', handle: '@nadia', color: 'amber', cat: 'films', items: ['Alien', 'Predator', 'The Terminator', 'RoboCop', 'Total Recall'] },
+  { name: 'Will T.', handle: '@willt', color: 'green', cat: 'tv', items: ['The Wire', 'Deadwood', 'Oz', 'The Sopranos', 'Rome'] },
+  { name: 'Elif S.', handle: '@elif', color: 'red', cat: 'books', items: ['Slaughterhouse-Five', 'Cat\'s Cradle', 'The Sirens of Titan', 'Breakfast of Champions', 'Mother Night'] },
+  { name: 'Ray C.', handle: '@rayc', color: 'blue', cat: 'albums', items: ['Electric Ladyland', 'Are You Experienced', 'Band of Gypsys', 'Axis: Bold as Love', 'Blues'] },
+  { name: 'Mia V.', handle: '@miav', color: 'amber', cat: 'tv', items: ['Twin Peaks', 'The X-Files', 'Lost', 'Stranger Things', 'True Detective'] },
+  { name: 'Otto H.', handle: '@otto', color: 'green', cat: 'films', items: ['Yojimbo', 'Sanjuro', 'Seven Samurai', 'Rashomon', 'Ikiru'] },
+  { name: 'Bex R.', handle: '@bexr', color: 'red', cat: 'albums', items: ['Elephant', 'White Blood Cells', 'De Stijl', 'Icky Thump', 'Get Behind Me Satan'] },
 ];
 
 const matchData = [
   { name: 'Lena M.', handle: '@lena', color: 'green', score: 91, shared: ['Dune', 'I Am Legend', 'The Stars My Destination'], following: false },
+  { name: 'Nadia F.', handle: '@nadia', color: 'amber', score: 85, shared: ['Alien', 'RoboCop', 'Escape from New York'], following: false },
   { name: 'Tom W.', handle: '@tomw', color: 'red', score: 78, shared: ['Philip K. Dick', 'Neal Stephenson', 'Hard SF'], following: false },
+  { name: 'Otto H.', handle: '@otto', color: 'green', score: 74, shared: ['Yojimbo', 'Seven Samurai', 'Classic action'], following: true },
   { name: 'Priya K.', handle: '@priya', color: 'blue', score: 65, shared: ['Ubik', 'The Dark Forest', 'Eon'], following: true },
-  { name: 'Dev P.', handle: '@devp', color: 'amber', score: 58, shared: ['Classic sci-fi', '1950s–70s era', 'Dystopia'], following: false },
+  { name: 'Will T.', handle: '@willt', color: 'green', score: 61, shared: ['The Wire', 'Deadwood', 'HBO drama'], following: false },
+  { name: 'Ray C.', handle: '@rayc', color: 'blue', score: 57, shared: ['Electric Ladyland', 'Hendrix', 'Classic rock'], following: false },
+  { name: 'Dev P.', handle: '@devp', color: 'amber', score: 52, shared: ['Classic sci-fi', '1950s–70s era', 'Dystopia'], following: false },
 ];
 
 const AVATAR_STYLES = {
