@@ -16,35 +16,40 @@ const lists = {
     { title: 'Eon', meta: 'Greg Bear · 1985', thumb: null },
   ],
   films: [
-    { title: '2001: A Space Odyssey', meta: 'Kubrick · 1968', thumb: null },
-    { title: 'Mulholland Drive', meta: 'Lynch · 2001', thumb: null },
-    { title: 'Yi Yi', meta: 'Edward Yang · 2000', thumb: null },
-    { title: 'Certified Copy', meta: 'Kiarostami · 2010', thumb: null },
-    { title: 'The Tree of Life', meta: 'Malick · 2011', thumb: null },
+    { title: 'RoboCop', meta: '1987', thumb: null },
+    { title: 'The Color of Money', meta: '1986', thumb: null },
+    { title: 'Alien', meta: '1979', thumb: null },
+    { title: 'Twelve Monkeys', meta: '1995', thumb: null },
+    { title: 'Escape from New York', meta: '1981', thumb: null },
+    { title: 'Aliens', meta: '1986', thumb: null },
+    { title: 'Yojimbo', meta: '1961', thumb: null },
+    { title: 'Rocky', meta: '1976', thumb: null },
+    { title: 'They Live', meta: '1988', thumb: null },
+    { title: 'A Better Tomorrow', meta: '1986', thumb: null },
   ],
   albums: [
-    { title: 'In the Aeroplane Over the Sea', meta: 'Neutral Milk Hotel · 1998', thumb: null },
-    { title: 'Carrie & Lowell', meta: 'Sufjan Stevens · 2015', thumb: null },
-    { title: 'OK Computer', meta: 'Radiohead · 1997', thumb: null },
-    { title: 'Blue', meta: 'Joni Mitchell · 1971', thumb: null },
-    { title: 'Illinois', meta: 'Sufjan Stevens · 2005', thumb: null },
-    { title: 'For Emma, Forever Ago', meta: 'Bon Iver · 2008', thumb: null },
-    { title: 'Blood on the Tracks', meta: 'Bob Dylan · 1975', thumb: null },
-    { title: 'The Suburbs', meta: 'Arcade Fire · 2010', thumb: null },
-    { title: 'Funeral', meta: 'Arcade Fire · 2004', thumb: null },
-    { title: 'A Moon Shaped Pool', meta: 'Radiohead · 2016', thumb: null },
+    { title: 'What Up, Dog?', meta: 'Was (Not Was) · 1988', thumb: null },
+    { title: 'Electric Ladyland', meta: 'The Jimi Hendrix Experience · 1968', thumb: null },
+    { title: 'Elephant', meta: 'The White Stripes · 2003', thumb: null },
+    { title: 'Origin of Symmetry', meta: 'Muse · 2001', thumb: null },
+    { title: 'Led Zeppelin IV', meta: 'Led Zeppelin · 1971', thumb: null },
+    { title: 'Every Waking Moment', meta: 'Citizen Cope · 2006', thumb: null },
+    { title: 'AM', meta: 'Arctic Monkeys · 2013', thumb: null },
   ],
   tv: [
     { title: 'The Wire', meta: 'HBO · 2002–2008', thumb: null },
-    { title: 'Twin Peaks', meta: 'Lynch · 1990–1991', thumb: null },
-    { title: 'Mad Men', meta: 'AMC · 2007–2015', thumb: null },
-    { title: 'Deadwood', meta: 'HBO · 2004–2006', thumb: null },
-    { title: 'Succession', meta: 'HBO · 2018–2023', thumb: null },
+    { title: 'Battlestar Galactica', meta: '2004', thumb: null },
+    { title: 'Breaking Bad', meta: '2008', thumb: null },
+    { title: 'Westworld', meta: '2016', thumb: null },
+    { title: 'Duckman', meta: '1994', thumb: null },
+    { title: 'BoJack Horseman', meta: '2014', thumb: null },
+    { title: 'Travelers', meta: '2016', thumb: null },
+    { title: 'Red Dwarf', meta: '1988', thumb: null },
   ],
 };
 
 const discoverData = [
-  { name: 'Priya K.', handle: '@priya', color: 'blue', cat: 'books', items: ['Foundation', 'Childhood\'s End', 'The Left Hand of Darkness', 'Solaris', 'Hyperion'] },
+  { name: 'Priya K.', handle: '@priya', color: 'blue', cat: 'books', items: ['Foundation', "Childhood's End", 'The Left Hand of Darkness', 'Solaris', 'Hyperion'] },
   { name: 'Marcus L.', handle: '@marcus', color: 'green', cat: 'films', items: ['Blade Runner', '2001: A Space Odyssey', 'Arrival', 'Stalker', 'Annihilation'] },
   { name: 'Sofia R.', handle: '@sofia', color: 'amber', cat: 'albums', items: ['Pet Sounds', 'OK Computer', 'Kid A', 'Selected Ambient Works', 'In Rainbows'] },
   { name: 'Tom W.', handle: '@tomw', color: 'red', cat: 'books', items: ['Neuromancer', 'Snow Crash', 'The Dispossessed', 'A Fire Upon the Deep', 'Blindsight'] },
@@ -61,7 +66,6 @@ const matchData = [
   { name: 'Dev P.', handle: '@devp', color: 'amber', score: 58, shared: ['Classic sci-fi', '1950s–70s era', 'Dystopia'], following: false },
 ];
 
-// Colour tokens for avatars (works light + dark)
 const AVATAR_STYLES = {
   blue:  { bg: '#dbeafe', text: '#1e40af' },
   green: { bg: '#dcfce7', text: '#166534' },
@@ -87,11 +91,19 @@ function initials(name) {
   return name.split(' ').map(n => n[0]).join('');
 }
 
-function coverHTML(thumb, cat, size = 38) {
+function coverHTML(thumb, cat) {
   if (thumb) {
-    return `<div class="item-cover"><img src="${thumb}" width="${size}" height="${size}" alt="" onerror="this.parentElement.innerHTML='${EMOJIS[cat]}'"/></div>`;
+    return `<div class="item-cover"><img src="${thumb}" width="38" height="38" alt="" onerror="this.parentElement.innerHTML='${EMOJIS[cat]}'"/></div>`;
   }
   return `<div class="item-cover">${EMOJIS[cat]}</div>`;
+}
+
+function escHtml(str) {
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
 }
 
 // ── Render: My List ───────────────────────────────────────────────────────
@@ -123,7 +135,6 @@ function renderMyList() {
     </div>
   `).join('');
 
-  // Remove buttons
   grid.querySelectorAll('.item-remove').forEach(btn => {
     btn.addEventListener('click', () => {
       lists[currentCat].splice(+btn.dataset.idx, 1);
@@ -131,7 +142,6 @@ function renderMyList() {
     });
   });
 
-  // Drag-and-drop
   initDrag(grid);
 
   const full = items.length >= 10;
@@ -144,60 +154,171 @@ function renderMyList() {
 }
 
 // ── Drag-and-drop ─────────────────────────────────────────────────────────
+// A floating <div class="drop-line"> is inserted between items to show
+// the drop target — no border hacks, so rounded corners stay clean.
+// After drop, cards animate to their new positions via a FLIP transition.
 
 function initDrag(grid) {
-  let dragIdx = null;
-  let overIdx = null;
+  let dragIdx   = null;
+  let insertPos = null;
+
+  const dropLine = document.createElement('div');
+  dropLine.className = 'drop-line';
+
+  function getItems() {
+    return [...grid.querySelectorAll('.list-item')];
+  }
+
+  function showLine(beforeEl) {
+    if (beforeEl) grid.insertBefore(dropLine, beforeEl);
+    else grid.appendChild(dropLine);
+  }
+
+  function removeLine() {
+    if (dropLine.parentNode) dropLine.parentNode.removeChild(dropLine);
+  }
+
+  function commitDrop() {
+    removeLine();
+    if (dragIdx === null || insertPos === null) { dragIdx = null; insertPos = null; return; }
+
+    const list = lists[currentCat];
+    const item = list.splice(dragIdx, 1)[0];
+    const at   = insertPos > dragIdx ? insertPos - 1 : insertPos;
+    list.splice(at, 0, item);
+
+    flipRender();
+    dragIdx   = null;
+    insertPos = null;
+  }
+
+  // ── Mouse drag ──
 
   grid.querySelectorAll('.list-item').forEach(el => {
     el.addEventListener('dragstart', e => {
       dragIdx = +el.dataset.idx;
       e.dataTransfer.effectAllowed = 'move';
-      // Delay adding class so the drag ghost renders cleanly
       requestAnimationFrame(() => el.classList.add('dragging'));
     });
 
     el.addEventListener('dragend', () => {
-      grid.querySelectorAll('.list-item').forEach(r => {
-        r.classList.remove('dragging', 'drag-over-top', 'drag-over-bottom');
-      });
-      dragIdx = null;
-      overIdx = null;
+      removeLine();
+      getItems().forEach(r => r.classList.remove('dragging'));
+      dragIdx = null; insertPos = null;
     });
 
     el.addEventListener('dragover', e => {
       e.preventDefault();
       e.dataTransfer.dropEffect = 'move';
+      const items     = getItems();
       const targetIdx = +el.dataset.idx;
-      if (targetIdx === dragIdx) return;
-
-      // Determine top or bottom half
-      const rect = el.getBoundingClientRect();
-      const mid  = rect.top + rect.height / 2;
-      const half = e.clientY < mid ? 'top' : 'bottom';
-
-      grid.querySelectorAll('.list-item').forEach(r => r.classList.remove('drag-over-top', 'drag-over-bottom'));
-      el.classList.add(half === 'top' ? 'drag-over-top' : 'drag-over-bottom');
-      overIdx = half === 'top' ? targetIdx : targetIdx + 1;
+      const rect      = el.getBoundingClientRect();
+      const after     = e.clientY > rect.top + rect.height / 2;
+      insertPos       = after ? targetIdx + 1 : targetIdx;
+      const nextEl    = items[after ? targetIdx + 1 : targetIdx] || null;
+      if (dropLine.nextSibling !== nextEl || !dropLine.parentNode) showLine(nextEl);
     });
 
-    el.addEventListener('dragleave', () => {
-      el.classList.remove('drag-over-top', 'drag-over-bottom');
+    el.addEventListener('dragleave', e => {
+      // Only remove line if leaving the grid entirely
+      if (!grid.contains(e.relatedTarget)) removeLine();
     });
 
     el.addEventListener('drop', e => {
       e.preventDefault();
-      if (dragIdx === null || overIdx === null) return;
-
-      const list = lists[currentCat];
-      const item = list.splice(dragIdx, 1)[0];
-      // Adjust insert index after removal
-      const insertAt = overIdx > dragIdx ? overIdx - 1 : overIdx;
-      list.splice(insertAt, 0, item);
-
-      renderMyList();
+      commitDrop();
     });
   });
+
+  grid.addEventListener('dragover', e => {
+    e.preventDefault();
+    if (e.target === grid) { insertPos = getItems().length; showLine(null); }
+  });
+
+  grid.addEventListener('drop', e => { e.preventDefault(); commitDrop(); });
+
+  // ── Touch drag ──
+
+  let touchEl     = null;
+  let touchClone  = null;
+  let touchOffY   = 0;
+
+  grid.querySelectorAll('.list-item').forEach(el => {
+    el.addEventListener('touchstart', e => {
+      const touch  = e.touches[0];
+      touchEl      = el;
+      dragIdx      = +el.dataset.idx;
+      const rect   = el.getBoundingClientRect();
+      touchOffY    = touch.clientY - rect.top;
+
+      touchClone = el.cloneNode(true);
+      Object.assign(touchClone.style, {
+        position: 'fixed', left: rect.left + 'px', top: rect.top + 'px',
+        width: rect.width + 'px', zIndex: 999, pointerEvents: 'none',
+        opacity: '0.85', boxShadow: '0 8px 24px rgba(0,0,0,0.15)',
+      });
+      touchClone.classList.add('touch-clone');
+      document.body.appendChild(touchClone);
+      requestAnimationFrame(() => el.classList.add('dragging'));
+    }, { passive: true });
+
+    el.addEventListener('touchmove', e => {
+      e.preventDefault();
+      const touch = e.touches[0];
+      if (touchClone) touchClone.style.top = (touch.clientY - touchOffY) + 'px';
+
+      // Find element under finger (hide clone first)
+      touchClone.style.display = 'none';
+      const target = document.elementFromPoint(touch.clientX, touch.clientY);
+      touchClone.style.display = '';
+
+      const hoverItem = target?.closest?.('.list-item');
+      if (hoverItem && hoverItem !== touchEl) {
+        const items     = getItems();
+        const rect      = hoverItem.getBoundingClientRect();
+        const after     = touch.clientY > rect.top + rect.height / 2;
+        const ti        = +hoverItem.dataset.idx;
+        insertPos       = after ? ti + 1 : ti;
+        showLine(items[after ? ti + 1 : ti] || null);
+      }
+    }, { passive: false });
+
+    el.addEventListener('touchend', () => {
+      if (touchClone) { touchClone.remove(); touchClone = null; }
+      touchEl?.classList.remove('dragging');
+      touchEl = null;
+      commitDrop();
+    });
+  });
+
+  // ── FLIP animation after drop ──
+
+  function flipRender() {
+    // Snapshot current positions before re-render
+    const items = getItems();
+    const before = new Map(items.map(el => [+el.dataset.idx, el.getBoundingClientRect().top]));
+
+    renderMyList();
+
+    // Animate new items from their old visual positions
+    const newItems = [...grid.querySelectorAll('.list-item')];
+    newItems.forEach((el, newI) => {
+      // Best effort: match by new index to old index via data
+      const oldTop = before.get(newI);
+      if (oldTop == null) return;
+      const newTop = el.getBoundingClientRect().top;
+      const delta  = oldTop - newTop;
+      if (Math.abs(delta) < 2) return;
+      el.style.transition = 'none';
+      el.style.transform  = `translateY(${delta}px)`;
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          el.style.transition = 'transform 0.22s cubic-bezier(0.25,0.46,0.45,0.94)';
+          el.style.transform  = 'translateY(0)';
+        });
+      });
+    });
+  }
 }
 
 // ── Render: Discover ──────────────────────────────────────────────────────
@@ -258,92 +379,76 @@ function updateProfileCounts() {
   });
 }
 
+// ── Export ────────────────────────────────────────────────────────────────
+
+function exportList(fmt) {
+  const items    = lists[currentCat];
+  const catLabel = currentCat.charAt(0).toUpperCase() + currentCat.slice(1);
+  const dateStr  = new Date().toISOString().slice(0, 10);
+  let content, filename, mime;
+
+  if (fmt === 'json') {
+    content  = JSON.stringify({ list: catLabel, user: '@Rob', exported: dateStr, items: items.map((item, i) => ({ rank: i + 1, title: item.title, meta: item.meta })) }, null, 2);
+    filename = `listmania-${currentCat}.json`;
+    mime     = 'application/json';
+  } else if (fmt === 'yaml') {
+    content  = [`list: ${catLabel}`, `user: "@Rob"`, `exported: ${dateStr}`, `items:`,
+      ...items.map((item, i) => `  - rank: ${i + 1}\n    title: "${item.title.replace(/"/g, '\\"')}"\n    meta: "${item.meta.replace(/"/g, '\\"')}"`)
+    ].join('\n');
+    filename = `listmania-${currentCat}.yaml`;
+    mime     = 'text/yaml';
+  } else if (fmt === 'md') {
+    content  = [`# ${catLabel} — @Rob's top ${items.length}`, ``, `> Exported ${dateStr} from Listmania`, ``,
+      ...items.map((item, i) => `${i + 1}. **${item.title}** — ${item.meta}`)
+    ].join('\n');
+    filename = `listmania-${currentCat}.md`;
+    mime     = 'text/markdown';
+  }
+
+  const a    = Object.assign(document.createElement('a'), { href: URL.createObjectURL(new Blob([content], { type: mime })), download: filename });
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
+
 // ── Search / Autocomplete ─────────────────────────────────────────────────
 
 async function searchAPI(query, cat) {
   if (cat === 'books') {
-    const res = await fetch(
-      `https://openlibrary.org/search.json?q=${encodeURIComponent(query)}&limit=7&fields=title,author_name,first_publish_year,cover_i`
-    );
+    const res  = await fetch(`https://openlibrary.org/search.json?q=${encodeURIComponent(query)}&limit=7&fields=title,author_name,first_publish_year,cover_i`);
     const data = await res.json();
-    return (data.docs || []).map(d => ({
-      title: d.title,
-      meta: [d.author_name?.[0], d.first_publish_year].filter(Boolean).join(' · '),
-      thumb: d.cover_i ? `https://covers.openlibrary.org/b/id/${d.cover_i}-S.jpg` : null,
-      source: 'Open Library',
-    }));
+    return (data.docs || []).map(d => ({ title: d.title, meta: [d.author_name?.[0], d.first_publish_year].filter(Boolean).join(' · '), thumb: d.cover_i ? `https://covers.openlibrary.org/b/id/${d.cover_i}-S.jpg` : null, source: 'Open Library' }));
   }
-
   if (cat === 'films' || cat === 'tv') {
-    const type = cat === 'films' ? 'movie' : 'tv';
-    const res = await fetch(
-      `https://api.themoviedb.org/3/search/${type}?api_key=2dca580c2a14b55200e784d157207b4d&query=${encodeURIComponent(query)}&page=1`
-    );
+    const res  = await fetch(`https://api.themoviedb.org/3/search/${cat === 'films' ? 'movie' : 'tv'}?api_key=2dca580c2a14b55200e784d157207b4d&query=${encodeURIComponent(query)}&page=1`);
     const data = await res.json();
-    return (data.results || []).slice(0, 7).map(d => ({
-      title: d.title || d.name,
-      meta: (d.release_date || d.first_air_date || '').slice(0, 4),
-      thumb: d.poster_path ? `https://image.tmdb.org/t/p/w92${d.poster_path}` : null,
-      source: 'TMDB',
-    }));
+    return (data.results || []).slice(0, 7).map(d => ({ title: d.title || d.name, meta: (d.release_date || d.first_air_date || '').slice(0, 4), thumb: d.poster_path ? `https://image.tmdb.org/t/p/w92${d.poster_path}` : null, source: 'TMDB' }));
   }
-
   if (cat === 'albums') {
-    const res = await fetch(
-      `https://musicbrainz.org/ws/2/release-group/?query=${encodeURIComponent(query)}&type=album&fmt=json&limit=7`,
-      { headers: { 'User-Agent': 'Listmania/1.0 (prototype)' } }
-    );
+    const res  = await fetch(`https://musicbrainz.org/ws/2/release-group/?query=${encodeURIComponent(query)}&type=album&fmt=json&limit=7`, { headers: { 'User-Agent': 'Listmania/1.0' } });
     const data = await res.json();
-    return (data['release-groups'] || []).slice(0, 7).map(d => ({
-      title: d.title,
-      meta: [d['artist-credit']?.[0]?.name, (d['first-release-date'] || '').slice(0, 4)].filter(Boolean).join(' · '),
-      thumb: null,
-      source: 'MusicBrainz',
-    }));
+    return (data['release-groups'] || []).slice(0, 7).map(d => ({ title: d.title, meta: [d['artist-credit']?.[0]?.name, (d['first-release-date'] || '').slice(0, 4)].filter(Boolean).join(' · '), thumb: null, source: 'MusicBrainz' }));
   }
-
   return [];
 }
 
 function renderDropdown(results) {
   const ac = document.getElementById('autocomplete');
   focusedIdx = -1;
-
-  if (!results.length) {
-    ac.innerHTML = `<div class="ac-empty">No results found</div>`;
-    ac.classList.add('open');
-    return;
-  }
-
+  if (!results.length) { ac.innerHTML = `<div class="ac-empty">No results found</div>`; ac.classList.add('open'); return; }
   ac.innerHTML = results.map((r, i) => `
     <div class="ac-item" data-idx="${i}">
-      <div class="ac-thumb">
-        ${r.thumb
-          ? `<img src="${r.thumb}" alt="" onerror="this.parentElement.innerHTML='${EMOJIS[currentCat]}'"/>`
-          : EMOJIS[currentCat]}
-      </div>
+      <div class="ac-thumb">${r.thumb ? `<img src="${r.thumb}" alt="" onerror="this.parentElement.innerHTML='${EMOJIS[currentCat]}'"/>` : EMOJIS[currentCat]}</div>
       <div style="min-width:0;flex:1">
         <div class="ac-title">${escHtml(r.title)}</div>
         ${r.meta ? `<div class="ac-meta">${escHtml(r.meta)}</div>` : ''}
         <div class="ac-source">${r.source}</div>
       </div>
-    </div>
-  `).join('');
-
-  ac.querySelectorAll('.ac-item').forEach(el => {
-    el.addEventListener('mousedown', e => {
-      e.preventDefault();
-      selectResult(+el.dataset.idx);
-    });
-  });
-
+    </div>`).join('');
+  ac.querySelectorAll('.ac-item').forEach(el => el.addEventListener('mousedown', e => { e.preventDefault(); selectResult(+el.dataset.idx); }));
   ac.classList.add('open');
 }
 
-function closeDropdown() {
-  document.getElementById('autocomplete').classList.remove('open');
-  focusedIdx = -1;
-}
+function closeDropdown() { document.getElementById('autocomplete').classList.remove('open'); focusedIdx = -1; }
 
 function setFocus(items) {
   items.forEach((el, i) => el.classList.toggle('focused', i === focusedIdx));
@@ -360,63 +465,7 @@ function selectResult(idx) {
   renderMyList();
 }
 
-// ── Export ────────────────────────────────────────────────────────────────
-
-function exportList(fmt) {
-  const items = lists[currentCat];
-  const catLabel = currentCat.charAt(0).toUpperCase() + currentCat.slice(1);
-  let content, filename, mime;
-
-  if (fmt === 'json') {
-    const payload = {
-      list: catLabel,
-      user: '@Rob',
-      exported: new Date().toISOString().slice(0, 10),
-      items: items.map((item, i) => ({ rank: i + 1, title: item.title, meta: item.meta })),
-    };
-    content  = JSON.stringify(payload, null, 2);
-    filename = `listmania-${currentCat}.json`;
-    mime     = 'application/json';
-  }
-
-  else if (fmt === 'yaml') {
-    const lines = [
-      `list: ${catLabel}`,
-      `user: "@Rob"`,
-      `exported: ${new Date().toISOString().slice(0, 10)}`,
-      `items:`,
-      ...items.map((item, i) =>
-        `  - rank: ${i + 1}\n    title: "${item.title.replace(/"/g, '\\"')}"\n    meta: "${item.meta.replace(/"/g, '\\"')}"`
-      ),
-    ];
-    content  = lines.join('\n');
-    filename = `listmania-${currentCat}.yaml`;
-    mime     = 'text/yaml';
-  }
-
-  else if (fmt === 'md') {
-    const lines = [
-      `# ${catLabel} — @Rob's top ${items.length}`,
-      ``,
-      `> Exported ${new Date().toISOString().slice(0, 10)} from Listmania`,
-      ``,
-      ...items.map((item, i) => `${i + 1}. **${item.title}** — ${item.meta}`),
-    ];
-    content  = lines.join('\n');
-    filename = `listmania-${currentCat}.md`;
-    mime     = 'text/markdown';
-  }
-
-  const blob = new Blob([content], { type: mime });
-  const url  = URL.createObjectURL(blob);
-  const a    = document.createElement('a');
-  a.href     = url;
-  a.download = filename;
-  a.click();
-  URL.revokeObjectURL(url);
-}
-
-
+// ── Nav & Tabs ────────────────────────────────────────────────────────────
 
 function showView(id) {
   document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
@@ -425,49 +474,19 @@ function showView(id) {
   document.querySelector(`.nav-item[data-view="${id}"]`).classList.add('active');
 }
 
-// ── Escape HTML ───────────────────────────────────────────────────────────
-
-function escHtml(str) {
-  return String(str)
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;');
-}
-
 // ── Init ──────────────────────────────────────────────────────────────────
 
 document.addEventListener('DOMContentLoaded', () => {
 
-  // Export button
+  // Export
   const exportBtn  = document.getElementById('export-btn');
   const exportMenu = document.getElementById('export-menu');
-
-  exportBtn.addEventListener('click', e => {
-    e.stopPropagation();
-    const open = exportMenu.classList.toggle('open');
-    exportBtn.classList.toggle('open', open);
-  });
-
-  exportMenu.querySelectorAll('.export-option').forEach(opt => {
-    opt.addEventListener('click', () => {
-      exportList(opt.dataset.fmt);
-      exportMenu.classList.remove('open');
-      exportBtn.classList.remove('open');
-    });
-  });
-
-  document.addEventListener('click', e => {
-    if (!document.getElementById('export-wrap').contains(e.target)) {
-      exportMenu.classList.remove('open');
-      exportBtn.classList.remove('open');
-    }
-  });
+  exportBtn.addEventListener('click', e => { e.stopPropagation(); const o = exportMenu.classList.toggle('open'); exportBtn.classList.toggle('open', o); });
+  exportMenu.querySelectorAll('.export-option').forEach(opt => opt.addEventListener('click', () => { exportList(opt.dataset.fmt); exportMenu.classList.remove('open'); exportBtn.classList.remove('open'); }));
+  document.addEventListener('click', e => { if (!document.getElementById('export-wrap').contains(e.target)) { exportMenu.classList.remove('open'); exportBtn.classList.remove('open'); } });
 
   // Nav
-  document.querySelectorAll('.nav-item').forEach(el => {
-    el.addEventListener('click', () => showView(el.dataset.view));
-  });
+  document.querySelectorAll('.nav-item').forEach(el => el.addEventListener('click', () => showView(el.dataset.view)));
 
   // My Lists tabs
   document.getElementById('my-tabs').addEventListener('click', e => {
@@ -491,9 +510,8 @@ document.addEventListener('DOMContentLoaded', () => {
     renderDiscover(btn.dataset.cat);
   });
 
-  // Search input
+  // Search
   const searchInput = document.getElementById('search-input');
-
   searchInput.addEventListener('input', () => {
     clearTimeout(debounceTimer);
     const val = searchInput.value.trim();
@@ -503,7 +521,7 @@ document.addEventListener('DOMContentLoaded', () => {
       try {
         searchResults = await searchAPI(val, currentCat);
         renderDropdown(searchResults);
-      } catch (err) {
+      } catch {
         searchResults = [];
         document.getElementById('autocomplete').innerHTML = `<div class="ac-empty">Search unavailable — check your connection</div>`;
         document.getElementById('autocomplete').classList.add('open');
@@ -515,22 +533,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
   searchInput.addEventListener('keydown', e => {
     const items = document.querySelectorAll('.ac-item');
-    if (e.key === 'ArrowDown') { e.preventDefault(); focusedIdx = Math.min(focusedIdx + 1, items.length - 1); setFocus(items); }
-    else if (e.key === 'ArrowUp') { e.preventDefault(); focusedIdx = Math.max(focusedIdx - 1, 0); setFocus(items); }
-    else if (e.key === 'Enter') { if (focusedIdx >= 0) selectResult(focusedIdx); }
-    else if (e.key === 'Escape') closeDropdown();
+    if      (e.key === 'ArrowDown') { e.preventDefault(); focusedIdx = Math.min(focusedIdx + 1, items.length - 1); setFocus(items); }
+    else if (e.key === 'ArrowUp')   { e.preventDefault(); focusedIdx = Math.max(focusedIdx - 1, 0); setFocus(items); }
+    else if (e.key === 'Enter')     { if (focusedIdx >= 0) selectResult(focusedIdx); }
+    else if (e.key === 'Escape')    closeDropdown();
   });
 
-  searchInput.addEventListener('focus', () => {
-    if (searchResults.length) document.getElementById('autocomplete').classList.add('open');
-  });
+  searchInput.addEventListener('focus', () => { if (searchResults.length) document.getElementById('autocomplete').classList.add('open'); });
+  document.addEventListener('click', e => { if (!document.getElementById('add-area').contains(e.target)) closeDropdown(); });
 
-  // Close dropdown on outside click
-  document.addEventListener('click', e => {
-    if (!document.getElementById('add-area').contains(e.target)) closeDropdown();
-  });
-
-  // Initial renders
   renderMyList();
   renderDiscover('all');
   renderMatches();
