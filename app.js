@@ -217,24 +217,13 @@ function _flipRender(grid) {
 }
 
 function initDrag(grid) {
-  // ── Mouse drag — only activate after 250ms hold ──
+
+  // ── Mouse drag ──
+  // No hold delay on desktop — native drag is intentional enough.
+  // Drop-line only moves when insertPos actually changes, preventing flicker.
 
   grid.querySelectorAll('.list-item').forEach(el => {
-    let holdTimer  = null;
-    let holdReady  = false;
-
-    el.addEventListener('mousedown', () => {
-      holdReady = false;
-      holdTimer = setTimeout(() => { holdReady = true; }, 250);
-    });
-
-    el.addEventListener('mouseup', () => {
-      clearTimeout(holdTimer);
-      holdReady = false;
-    });
-
     el.addEventListener('dragstart', e => {
-      if (!holdReady) { e.preventDefault(); return; }
       _dragIdx   = +el.dataset.idx;
       _insertPos = null;
       _committed = false;
@@ -243,41 +232,38 @@ function initDrag(grid) {
     });
 
     el.addEventListener('dragend', () => {
-      // dragend fires even if drop didn't land on a valid target — clean up
       _removeLine();
       _getItems(grid).forEach(r => r.classList.remove('dragging'));
-      _dragIdx   = null;
-      _insertPos = null;
+      if (!_committed) { _dragIdx = null; _insertPos = null; }
       _committed = false;
     });
 
     el.addEventListener('dragover', e => {
       e.preventDefault();
       e.dataTransfer.dropEffect = 'move';
-      const items     = _getItems(grid);
       const targetIdx = +el.dataset.idx;
       const rect      = el.getBoundingClientRect();
       const after     = e.clientY > rect.top + rect.height / 2;
-      _insertPos      = after ? targetIdx + 1 : targetIdx;
-      const nextEl    = items[after ? targetIdx + 1 : targetIdx] || null;
-      _showLine(grid, nextEl);
+      const newPos    = after ? targetIdx + 1 : targetIdx;
+      if (newPos === _insertPos) return; // no change — skip DOM write
+      _insertPos = newPos;
+      const items  = _getItems(grid);
+      _showLine(grid, items[after ? targetIdx + 1 : targetIdx] || null);
     });
 
     el.addEventListener('drop', e => {
       e.preventDefault();
-      e.stopPropagation(); // prevent grid's drop firing too
+      e.stopPropagation();
       _commitDrop(grid);
     });
   });
 
-  // Grid-level dragover handles the empty-space below all items
   grid.addEventListener('dragover', e => {
     e.preventDefault();
     e.dataTransfer.dropEffect = 'move';
-    // Only act when dragging over the grid background, not over a child item
     if (e.target === grid) {
-      _insertPos = _getItems(grid).length;
-      _showLine(grid, null);
+      const newPos = _getItems(grid).length;
+      if (newPos !== _insertPos) { _insertPos = newPos; _showLine(grid, null); }
     }
   });
 
@@ -286,18 +272,20 @@ function initDrag(grid) {
     _commitDrop(grid);
   });
 
-  // ── Touch drag — only activate after 250ms hold ──
+  // ── Touch drag — 250ms hold to activate so scroll works freely ──
 
-  let touchEl    = null;
-  let touchClone = null;
-  let touchOffY  = 0;
-  let touchTimer = null;
-  let touchReady = false;
+  let touchEl     = null;
+  let touchClone  = null;
+  let touchOffY   = 0;
+  let touchTimer  = null;
+  let touchReady  = false;
+  let touchStartY = 0;
 
   grid.querySelectorAll('.list-item').forEach(el => {
     el.addEventListener('touchstart', e => {
-      touchReady = false;
       const touch = e.touches[0];
+      touchStartY = touch.clientY;
+      touchReady  = false;
 
       touchTimer = setTimeout(() => {
         touchReady = true;
@@ -316,20 +304,17 @@ function initDrag(grid) {
         });
         document.body.appendChild(touchClone);
         el.classList.add('dragging');
-
-        // Light haptic feedback if available
         navigator.vibrate?.(30);
       }, 250);
     }, { passive: true });
 
     el.addEventListener('touchmove', e => {
+      const touch = e.touches[0];
       if (!touchReady) {
-        // Not yet held long enough — cancel the timer so scroll works freely
-        clearTimeout(touchTimer);
+        if (Math.abs(touch.clientY - touchStartY) > 8) clearTimeout(touchTimer);
         return;
       }
       e.preventDefault();
-      const touch = e.touches[0];
       if (touchClone) touchClone.style.top = (touch.clientY - touchOffY) + 'px';
 
       touchClone.style.display = 'none';
@@ -342,8 +327,11 @@ function initDrag(grid) {
         const rect   = hoverItem.getBoundingClientRect();
         const after  = touch.clientY > rect.top + rect.height / 2;
         const ti     = +hoverItem.dataset.idx;
-        _insertPos   = after ? ti + 1 : ti;
-        _showLine(grid, items[after ? ti + 1 : ti] || null);
+        const newPos = after ? ti + 1 : ti;
+        if (newPos !== _insertPos) {
+          _insertPos = newPos;
+          _showLine(grid, items[after ? ti + 1 : ti] || null);
+        }
       }
     }, { passive: false });
 
@@ -352,9 +340,17 @@ function initDrag(grid) {
       if (!touchReady) { touchReady = false; return; }
       if (touchClone) { touchClone.remove(); touchClone = null; }
       touchEl?.classList.remove('dragging');
-      touchEl    = null;
-      touchReady = false;
+      touchEl = null; touchReady = false;
       _commitDrop(grid);
+    });
+
+    el.addEventListener('touchcancel', () => {
+      clearTimeout(touchTimer);
+      if (touchClone) { touchClone.remove(); touchClone = null; }
+      touchEl?.classList.remove('dragging');
+      touchEl = null; touchReady = false;
+      _removeLine();
+      _dragIdx = null; _insertPos = null; _committed = false;
     });
   });
 }
