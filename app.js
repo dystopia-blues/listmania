@@ -133,10 +133,10 @@ function renderMyList() {
       </div>
       <div class="item-actions">
         <button class="move-btn move-up" data-idx="${i}" title="Move up" ${i === 0 ? 'disabled' : ''}>
-          <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M5 8V2M2 5l3-3 3 3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <svg width="14" height="14" viewBox="0 0 10 10" fill="none"><path d="M5 8V2M2 5l3-3 3 3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </button>
         <button class="move-btn move-down" data-idx="${i}" title="Move down" ${i === items.length - 1 ? 'disabled' : ''}>
-          <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M5 2v6M2 5l3 3 3-3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <svg width="14" height="14" viewBox="0 0 10 10" fill="none"><path d="M5 2v6M2 5l3 3 3-3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </button>
         <button class="item-remove" data-idx="${i}" title="Remove">×</button>
       </div>
@@ -150,6 +150,10 @@ function renderMyList() {
       const list = lists[currentCat];
       [list[i - 1], list[i]] = [list[i], list[i - 1]];
       renderMyList();
+      // Animate the two swapped items
+      const newItems = grid.querySelectorAll('.list-item');
+      newItems[i - 1]?.classList.add('item-moved-up');
+      newItems[i]?.classList.add('item-moved-down');
     });
   });
 
@@ -160,6 +164,9 @@ function renderMyList() {
       if (i === list.length - 1) return;
       [list[i], list[i + 1]] = [list[i + 1], list[i]];
       renderMyList();
+      const newItems = grid.querySelectorAll('.list-item');
+      newItems[i]?.classList.add('item-moved-down');
+      newItems[i + 1]?.classList.add('item-moved-up');
     });
   });
 
@@ -222,25 +229,21 @@ function _commitDrop(grid) {
 }
 
 function _flipRender(grid) {
-  // Snapshot Y positions of every item by its current data-idx
+  // Snapshot old Y positions keyed by data-idx before re-render
   const before = new Map(
     _getItems(grid).map(el => [+el.dataset.idx, el.getBoundingClientRect().top])
   );
 
   renderMyList();
 
-  // Animate from old positions
+  // Tag each item with a directional animation class based on which way it moved
   _getItems(grid).forEach((el, newI) => {
     const oldTop = before.get(newI);
     if (oldTop == null) return;
-    const delta = oldTop - el.getBoundingClientRect().top;
+    const newTop = el.getBoundingClientRect().top;
+    const delta  = newTop - oldTop;
     if (Math.abs(delta) < 2) return;
-    el.style.transition = 'none';
-    el.style.transform  = `translateY(${delta}px)`;
-    requestAnimationFrame(() => requestAnimationFrame(() => {
-      el.style.transition = 'transform 0.22s cubic-bezier(0.25,0.46,0.45,0.94)';
-      el.style.transform  = 'translateY(0)';
-    }));
+    el.classList.add(delta < 0 ? 'item-moved-up' : 'item-moved-down');
   });
 }
 
