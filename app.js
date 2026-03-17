@@ -85,6 +85,25 @@ const AVATAR_STYLES = {
   red:   { bg: '#fee2e2', text: '#991b1b' },
 };
 
+// ── localStorage persistence ──────────────────────────────────────────────
+
+const LS_KEY = 'listmania_lists_v1';
+
+function saveLists() {
+  try { localStorage.setItem(LS_KEY, JSON.stringify(lists)); } catch(e) {}
+}
+
+function loadLists() {
+  try {
+    const saved = localStorage.getItem(LS_KEY);
+    if (!saved) return;
+    const parsed = JSON.parse(saved);
+    ['books','films','albums','tv'].forEach(cat => {
+      if (parsed[cat] && Array.isArray(parsed[cat])) lists[cat] = parsed[cat];
+    });
+  } catch(e) {}
+}
+
 // ── State ─────────────────────────────────────────────────────────────────
 
 let currentCat = 'books';
@@ -167,6 +186,7 @@ function renderMyList(animMap) {
       const i = +btn.dataset.u;
       if (i === 0) return;
       [lists[currentCat][i - 1], lists[currentCat][i]] = [lists[currentCat][i], lists[currentCat][i - 1]];
+      saveLists();
       renderMyList({ [i - 1]: 'item-moved-up', [i]: 'item-moved-down' });
     });
   });
@@ -176,6 +196,7 @@ function renderMyList(animMap) {
       const i = +btn.dataset.d;
       if (i === lists[currentCat].length - 1) return;
       [lists[currentCat][i], lists[currentCat][i + 1]] = [lists[currentCat][i + 1], lists[currentCat][i]];
+      saveLists();
       renderMyList({ [i]: 'item-moved-down', [i + 1]: 'item-moved-up' });
     });
   });
@@ -183,6 +204,7 @@ function renderMyList(animMap) {
   grid.querySelectorAll('[data-x]').forEach(btn => {
     btn.addEventListener('click', () => {
       lists[currentCat].splice(+btn.dataset.x, 1);
+      saveLists();
       renderMyList();
     });
   });
@@ -283,6 +305,7 @@ function initDrag(grid) {
           const item = list.splice(dragIdx, 1)[0];
           const at   = insertPos > dragIdx ? insertPos - 1 : insertPos;
           list.splice(at, 0, item);
+          saveLists();
 
           // Build animation map
           const animMap = {};
@@ -443,6 +466,7 @@ function selectResult(idx) {
   document.getElementById('search-input').value = '';
   searchResults = [];
   closeDropdown();
+  saveLists();
   renderMyList();
 }
 
@@ -523,6 +547,7 @@ document.addEventListener('DOMContentLoaded', () => {
   searchInput.addEventListener('focus', () => { if (searchResults.length) document.getElementById('autocomplete').classList.add('open'); });
   document.addEventListener('click', e => { if (!document.getElementById('add-area').contains(e.target)) closeDropdown(); });
 
+  loadLists();
   renderMyList();
   renderDiscover('all');
   renderMatches();
