@@ -122,11 +122,35 @@ function initials(name) {
   return name.split(' ').map(n => n[0]).join('');
 }
 
-function coverHTML(thumb, cat) {
+function coverHTML(thumb, cat, idx) {
   if (thumb) {
-    return `<div class="item-cover"><img src="${thumb}" width="38" height="38" alt="" onerror="this.parentElement.innerHTML='${EMOJIS[cat]}'"/></div>`;
+    return `<div class="item-cover"><img src="${thumb}" width="38" height="38" alt="" onerror="healThumb(this,'${cat}',${idx})"/></div>`;
   }
   return `<div class="item-cover">${EMOJIS[cat]}</div>`;
+}
+
+async function healThumb(img, cat, idx) {
+  img.onerror = null; // prevent retry loops
+  const item = lists[cat]?.[idx];
+  if (!item) { img.parentElement.innerHTML = EMOJIS[cat]; return; }
+  const type   = cat === 'tv' ? 'tv' : 'movie';
+  const year   = item.meta.match(/\d{4}/)?.[0] || '';
+  const yParam = cat === 'tv' ? 'first_air_date_year' : 'primary_release_year';
+  try {
+    const res  = await fetch(`https://api.themoviedb.org/3/search/${type}?api_key=2dca580c2a14b55200e784d157207b4d&query=${encodeURIComponent(item.title)}&${yParam}=${year}`);
+    const data = await res.json();
+    const hit  = (data.results || [])[0];
+    if (hit?.poster_path) {
+      const newThumb = `https://image.tmdb.org/t/p/w92${hit.poster_path}`;
+      img.src = newThumb;
+      lists[cat][idx].thumb = newThumb;
+      saveLists();
+    } else {
+      img.parentElement.innerHTML = EMOJIS[cat];
+    }
+  } catch {
+    img.parentElement.innerHTML = EMOJIS[cat];
+  }
 }
 
 function escHtml(str) {
@@ -157,7 +181,7 @@ function renderMyList(animMap) {
         </svg>
       </div>
       <div class="rank-num">${i + 1}</div>
-      ${coverHTML(item.thumb, currentCat)}
+      ${coverHTML(item.thumb, currentCat, i)}
       <div class="item-info">
         <div class="item-title">${escHtml(item.title)}</div>
         <div class="item-meta">${escHtml(item.meta)}</div>
