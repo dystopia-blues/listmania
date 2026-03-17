@@ -33,6 +33,36 @@
   }
 }
 
+/* Manual theme overrides — set via JS, override system preference */
+[data-theme="light"] {
+  --bg:      #ffffff;
+  --bg2:     #f7f6f3;
+  --bg3:     #f0efe9;
+  --text:    #1a1a18;
+  --text2:   #6b6a65;
+  --text3:   #a09f9a;
+  --border:  rgba(0,0,0,0.1);
+  --border2: rgba(0,0,0,0.18);
+  --border3: rgba(0,0,0,0.28);
+  --accent:  #1a1a18;
+}
+[data-theme="dark"] {
+  --bg:      #141413;
+  --bg2:     #1e1d1b;
+  --bg3:     #252421;
+  --text:    #e8e6df;
+  --text2:   #9a9890;
+  --text3:   #5e5d58;
+  --border:  rgba(255,255,255,0.08);
+  --border2: rgba(255,255,255,0.14);
+  --border3: rgba(255,255,255,0.22);
+  --accent:  #e8e6df;
+}
+
+/* ── Theme toggle ── */
+.theme-toggle { margin-left: auto; padding: 4px 6px; border: none; background: transparent; color: var(--text3); cursor: pointer; border-radius: var(--radius-sm); display: flex; align-items: center; transition: color 0.13s, background 0.13s; flex-shrink: 0; }
+.theme-toggle:hover { color: var(--text); background: var(--bg3); }
+
 html, body { height: 100%; }
 body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; font-size: 14px; color: var(--text); background: var(--bg3); -webkit-font-smoothing: antialiased; }
 
@@ -41,7 +71,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; f
 
 /* ── Sidebar ── */
 .sidebar { width: var(--sidebar-w); border-right: 0.5px solid var(--border); display: flex; flex-direction: column; flex-shrink: 0; padding: 24px 0; }
-.logo { padding: 0 22px 22px; font-size: 16px; font-weight: 600; letter-spacing: -0.4px; border-bottom: 0.5px solid var(--border); margin-bottom: 14px; }
+.logo { padding: 0 22px 22px; font-size: 16px; font-weight: 600; letter-spacing: -0.4px; border-bottom: 0.5px solid var(--border); margin-bottom: 14px; display: flex; align-items: center; }
 .logo-muted { opacity: 0.35; font-weight: 400; }
 nav { display: flex; flex-direction: column; }
 .nav-item { display: flex; align-items: center; gap: 10px; padding: 9px 22px; font-size: 13px; color: var(--text2); cursor: pointer; transition: background 0.12s, color 0.12s; user-select: none; }

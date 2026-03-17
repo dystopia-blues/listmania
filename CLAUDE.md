@@ -33,7 +33,7 @@ Four views rendered as `<section class="view">` elements, toggled via `.active` 
 - `profile` — Rob's profile with stats and list summaries
 
 ### Data model
-All data lives in `app.js` as plain JS objects — no backend, no localStorage yet.
+All data lives in `app.js` as plain JS objects. Lists are persisted to localStorage.
 
 ```js
 lists = { books: [{title, meta, thumb}], films: [...], albums: [...], tv: [...] }
@@ -71,13 +71,21 @@ Current approach:
 - `pointerup` commits the move, removes ghost, calls `renderMyList(animMap)`
 - Touch drag uses a 250ms hold timer before activating, allowing scroll to work unimpeded
 
-### Search / autocomplete
-- Books → Open Library API (no key needed)
-- Films/TV → TMDB API (key: `2dca580c2a14b55200e784d157207b4d`)
-- Albums → MusicBrainz API (no key needed)
-- 320ms debounce on input
-- Keyboard navigation: ↑↓ Enter Esc
-- Results show cover art thumbnails where available
+### localStorage persistence
+Lists are saved to localStorage under the key `listmania_lists_v1` on every mutation (add, remove, reorder via arrows or drag). On page load, `loadLists()` is called before the first render — if localStorage has data it overrides the hardcoded defaults. This means cover art URLs, custom ordering, and any additions persist across page reloads without a backend.
+
+```js
+saveLists()  // call after every mutation
+loadLists()  // called once on DOMContentLoaded before renderMyList()
+```
+
+### Cover art — hotlink approach
+No images are downloaded or stored locally. Cover art is hotlinked directly from source CDNs:
+- **Films/TV** → TMDB CDN: `https://image.tmdb.org/t/p/w92/{poster_path}`
+- **Books** → Open Library: `https://covers.openlibrary.org/b/isbn/{ISBN}-M.jpg`
+- **Albums** → No free cover API without a key. Albums show category emoji for now. Fix when backend is in place.
+
+The prefilled demo data (Rob's lists) has hardcoded thumb URLs for films, TV and books. Some TMDB poster paths may be slightly off — the `onerror` handler falls back to the category emoji gracefully. If a poster is wrong, the user can remove the item and re-add it via search, which will pull the correct URL from TMDB and save it to localStorage.
 
 ### Export
 Export button top-right of My Lists view. Exports current list (respecting current sort order) as JSON, YAML, or Markdown. Triggers browser file download.
@@ -113,15 +121,18 @@ Sidebar collapses to sticky top nav bar. Discover grid goes single column. Autoc
 - [ ] Per-category enable/disable toggle on profile page (users can make individual lists public/private)
 - [ ] Shareable profile URL — Option 1: URL-encoded state (no backend needed as first step)
 - [ ] User onboarding flow for new blank-state users
-- [ ] Re-add films/TV lists via TMDB search to pull cover art thumbnails
+- [x] Cover art via hotlinks — TMDB for films/TV, Open Library for books (done)
+- [ ] Album cover art — needs backend or a key'd API (Spotify, iTunes)
 
 ### Data & search
 - [ ] Custom categories (v2 — but consider data model compatibility now)
 
 ### Infrastructure
-- [ ] Backend / persistence — Supabase recommended (free tier, Postgres, auth, JS SDK)
+- [x] localStorage persistence for lists including thumb URLs (done)
+- [ ] Backend / VM — Node.js + Express + PostgreSQL recommended over Supabase
 - [ ] Shareable profile URL Option 2 — `/@Rob` style permanent links (requires backend)
 - [ ] Proxy TMDB API key through backend (currently exposed in frontend)
+- [ ] Album cover art storage once backend exists
 
 ### Product
 - [ ] Lead category decision: Films vs Books (leaning Films for initial density)

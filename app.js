@@ -552,4 +552,32 @@ document.addEventListener('DOMContentLoaded', () => {
   renderDiscover('all');
   renderMatches();
   updateProfileCounts();
+
+  // ── Theme toggle ──────────────────────────────────────────────────────────
+  const SUN_SVG  = `<svg width="14" height="14" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="3" fill="currentColor"/><path d="M8 1v2M8 13v2M1 8h2M13 8h2M3.05 3.05l1.41 1.41M11.54 11.54l1.41 1.41M3.05 12.95l1.41-1.41M11.54 4.46l1.41-1.41" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>`;
+  const MOON_SVG = `<svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M13.5 10.5A6 6 0 016.5 3.5a6 6 0 100 10 6 6 0 007-3z" fill="currentColor"/></svg>`;
+
+  function effectiveTheme() {
+    return localStorage.getItem('theme') ||
+      (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+  }
+
+  function applyTheme(theme) {
+    document.documentElement.dataset.theme = theme;
+    localStorage.setItem('theme', theme);
+    const btn = document.getElementById('theme-toggle');
+    if (theme === 'dark') {
+      btn.innerHTML = SUN_SVG;
+      btn.title = 'Switch to light mode';
+    } else {
+      btn.innerHTML = MOON_SVG;
+      btn.title = 'Switch to dark mode';
+    }
+  }
+
+  document.getElementById('theme-toggle').addEventListener('click', () => {
+    applyTheme(effectiveTheme() === 'dark' ? 'light' : 'dark');
+  });
+
+  applyTheme(effectiveTheme());
 });

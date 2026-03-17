@@ -5,12 +5,13 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Listmania</title>
   <link rel="stylesheet" href="style.css"/>
+  <script>(function(){var t=localStorage.getItem('theme');if(t)document.documentElement.dataset.theme=t;}());</script>
 </head>
 <body>
   <div class="app">
     <!-- SIDEBAR -->
     <aside class="sidebar">
-      <div class="logo">List<span class="logo-muted">mania</span></div>
+      <div class="logo">List<span class="logo-muted">mania</span><button class="theme-toggle" id="theme-toggle" aria-label="Toggle theme"></button></div>
       <nav>
         <div class="nav-item active" data-view="my-lists">
           <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><rect x="2" y="3" width="12" height="1.5" rx="0.75" fill="currentColor"/><rect x="2" y="7" width="9" height="1.5" rx="0.75" fill="currentColor"/><rect x="2" y="11" width="11" height="1.5" rx="0.75" fill="currentColor"/></svg>
