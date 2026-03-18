@@ -37,6 +37,7 @@ All data lives in `app.js` as plain JS objects. Lists are persisted to localStor
 
 ```js
 lists = { books: [{title, meta, thumb}], films: [...], albums: [...], tv: [...] }
+// meta format: "Author · Year" (books/albums) or "Year" (films/tv) — year is parsed from meta where needed
 discoverData = [{name, handle, color, cat, items[]}]
 matchData = [{name, handle, color, score, shared[], following}]
 ```
@@ -190,7 +191,7 @@ Other candidates: CultureVulture, Strata, Crit, Savant
 
 ## Rob's lists (current prototype data)
 
-**Books:** Dune, The Moon is a Harsh Mistress, I Am Legend, Flow My Tears the Policeman Said, Ubik, The Stars My Destination, The Dark Forest, Fall; or Dodge in Hell, The Man in the High Castle, Eon
+**Books:** Dune, I Am Legend, The Moon is a Harsh Mistress, Flow My Tears the Policeman Said, Ubik, The Windup Girl, God Emperor of Dune, The Dark Forest, The Stars My Destination, Fall; or Dodge in Hell, The Man in the High Castle, Dune Messiah, Children of Dune, Heretics of Dune, Chapterhouse: Dune, Eon, Thin Air, The Forever War, The Fountainhead, Fahrenheit 451, Valis, The Door into Summer
 
 **Films:** RoboCop, The Color of Money, Alien, Twelve Monkeys, Escape from New York, Aliens, Yojimbo, Rocky, They Live, A Better Tomorrow
 
