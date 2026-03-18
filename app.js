@@ -136,7 +136,7 @@ function initials(name) {
 
 function coverHTML(thumb, cat, idx) {
   if (thumb) {
-    return `<div class="item-cover"><img src="${thumb}" height="76" alt="" onerror="healThumb(this,'${cat}',${idx})"/></div>`;
+    return `<div class="item-cover"><img src="${thumb}" height="100" alt="" onerror="healThumb(this,'${cat}',${idx})"/></div>`;
   }
   return `<div class="item-cover">${EMOJIS[cat]}</div>`;
 }
