@@ -85,7 +85,15 @@ No images are downloaded or stored locally. Cover art is hotlinked directly from
 - **Books** → Open Library: `https://covers.openlibrary.org/b/isbn/{ISBN}-M.jpg`
 - **Albums** → No free cover API without a key. Albums show category emoji for now. Fix when backend is in place.
 
-The prefilled demo data (Rob's lists) has hardcoded thumb URLs for films, TV and books. Some TMDB poster paths may be slightly off — the `onerror` handler falls back to the category emoji gracefully. If a poster is wrong, the user can remove the item and re-add it via search, which will pull the correct URL from TMDB and save it to localStorage.
+The prefilled demo data has hardcoded thumb URLs for films, TV and books. If a TMDB poster URL returns a 404, `healThumb(img, cat, idx)` fires — it queries TMDB by title + year (`primary_release_year` for films, `first_air_date_year` for TV), updates `img.src` in-place, writes the correct URL back to `lists[cat][idx].thumb`, and calls `saveLists()` so the fix persists to localStorage. The emoji fallback only happens if TMDB returns no result.
+
+### Theme (dark/light mode)
+Theme is controlled by a `data-theme` attribute on `<html>`, set to `"dark"` or `"light"`. This overrides the `@media (prefers-color-scheme: dark)` default. Preference is persisted in localStorage under the key `"theme"`. An inline `<script>` in `<head>` applies the saved theme before first paint to prevent flash.
+
+- Toggle button (`.theme-toggle`) lives in the `.logo` bar — visible on both desktop and mobile
+- Shows sun icon in dark mode, moon icon in light mode
+- `applyTheme(theme)` sets the attribute, saves to localStorage, and updates the icon
+- `effectiveTheme()` reads localStorage or falls back to system preference
 
 ### Export
 Export button top-right of My Lists view. Exports current list (respecting current sort order) as JSON, YAML, or Markdown. Triggers browser file download.
@@ -94,7 +102,7 @@ Export button top-right of My Lists view. Exports current list (respecting curre
 
 ## CSS conventions
 
-### Variables (defined in `:root`, dark mode overrides in `@media (prefers-color-scheme: dark)`)
+### Variables (defined in `:root`; dark mode via `@media (prefers-color-scheme: dark)` and overridden by `[data-theme]` on `<html>`)
 ```css
 --bg, --bg2, --bg3          /* background levels */
 --text, --text2, --text3    /* text levels */
@@ -122,6 +130,8 @@ Sidebar collapses to sticky top nav bar. Discover grid goes single column. Autoc
 - [ ] Shareable profile URL — Option 1: URL-encoded state (no backend needed as first step)
 - [ ] User onboarding flow for new blank-state users
 - [x] Cover art via hotlinks — TMDB for films/TV, Open Library for books (done)
+- [x] Dark/light mode toggle — sun/moon button in logo bar, persisted to localStorage (done)
+- [x] TMDB poster auto-heal — broken poster URLs are fixed at runtime via `healThumb()` (done)
 - [ ] Album cover art — needs backend or a key'd API (Spotify, iTunes)
 
 ### Data & search
@@ -152,6 +162,8 @@ Sidebar collapses to sticky top nav bar. Discover grid goes single column. Autoc
 | `data-i` not `data-idx` | Shorter, consistent with `data-h` for handle |
 | TMDB free public key in frontend | Acceptable for prototype, needs proxying before public launch |
 | animMap passed into renderMyList | Cleaner than post-render DOM queries for animation targeting |
+| `data-theme` on `<html>` for theme | Overrides media query cleanly; inline `<script>` in `<head>` prevents FOUC |
+| `healThumb()` on TMDB onerror | Auto-fixes stale poster paths without user intervention; persists to localStorage |
 
 ---
 
