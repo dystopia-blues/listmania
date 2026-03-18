@@ -2,7 +2,7 @@
 
 ## What this is
 
-Listmania is a taste-sharing social app where users curate top 10 lists across Books, Films, Albums and TV shows, then discover and match with people who share their cultural sensibility. Think Letterboxd but cross-category, with a taste-matching graph across all categories.
+Listmania is a taste-sharing social app where users curate top 50 lists across Books, Films, Albums and TV shows, then discover and match with people who share their cultural sensibility. Think Letterboxd but cross-category, with a taste-matching graph across all categories.
 
 Working name is Listmania. Strong alternative candidate: **curation.ink** (domain confirmed available). Other names under consideration: Wavelength (taken), CultureVulture, Canon/Canonical (taken by Ubuntu).
 

@@ -165,7 +165,7 @@ function escHtml(str) {
 
 function renderMyList(animMap) {
   const items = lists[currentCat];
-  document.getElementById('list-label').textContent = `Top 10 ${currentCat}`;
+  document.getElementById('list-label').textContent = `Top 50 ${currentCat}`;
 
   const grid = document.getElementById('my-list');
   grid.innerHTML = items.map((item, i) => `
@@ -235,7 +235,7 @@ function renderMyList(animMap) {
 
   initDrag(grid);
 
-  const full = items.length >= 10;
+  const full = items.length >= 50;
   const input = document.getElementById('search-input');
   input.disabled = full;
   input.placeholder = full ? 'List is full' : 'Search to add…';
@@ -485,7 +485,7 @@ function setFocus(items) {
 
 function selectResult(idx) {
   const r = searchResults[idx];
-  if (!r || lists[currentCat].length >= 10) return;
+  if (!r || lists[currentCat].length >= 50) return;
   lists[currentCat].push({ title: r.title, meta: r.meta || '—', thumb: r.thumb || null });
   document.getElementById('search-input').value = '';
   searchResults = [];
