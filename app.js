@@ -28,16 +28,26 @@ const lists = {
     { title: 'The Door into Summer',            meta: 'Robert A. Heinlein · 1957',      thumb: 'https://covers.openlibrary.org/b/isbn/9780345330123-M.jpg' },
   ],
   films: [
-    { title: 'RoboCop',              meta: '1987', thumb: 'https://image.tmdb.org/t/p/w92/dDwuD4v7gBomJnlzUMkFEjOjJuD.jpg' },
-    { title: 'The Color of Money',   meta: '1986', thumb: 'https://image.tmdb.org/t/p/w92/7ReMwMgrZEMFPvHWMR0LH5r8cBP.jpg' },
-    { title: 'Alien',                meta: '1979', thumb: 'https://image.tmdb.org/t/p/w92/vfrQk5IPloGg1v9Rzbh2Eg3VGyM.jpg' },
-    { title: 'Twelve Monkeys',       meta: '1995', thumb: 'https://image.tmdb.org/t/p/w92/6Sj9wDu3YugthXsU0genocvnY2P.jpg' },
-    { title: 'Escape from New York', meta: '1981', thumb: 'https://image.tmdb.org/t/p/w92/x6PBMnPnFHiHlhgfEo2DyKLCEFn.jpg' },
-    { title: 'Aliens',               meta: '1986', thumb: 'https://image.tmdb.org/t/p/w92/r1x5JGpyqZU8PYhbs4UcrO1Xb6x.jpg' },
-    { title: 'Yojimbo',              meta: '1961', thumb: 'https://image.tmdb.org/t/p/w92/aJCtkxLLzkk1pnMn9hVP9BuBMGY.jpg' },
-    { title: 'Rocky',                meta: '1976', thumb: 'https://image.tmdb.org/t/p/w92/cqB3TXJ6UBiQhvGMDRDFMBBkZGE.jpg' },
-    { title: 'They Live',            meta: '1988', thumb: 'https://image.tmdb.org/t/p/w92/6putjDjcL98AcbN9Hbfnz3J1oEX.jpg' },
-    { title: 'A Better Tomorrow',    meta: '1986', thumb: 'https://image.tmdb.org/t/p/w92/nJSFVFdFPHxFQE4PJKQFALkFgIk.jpg' },
+    { title: 'RoboCop',                              meta: '1987', thumb: 'https://image.tmdb.org/t/p/w92/dDwuD4v7gBomJnlzUMkFEjOjJuD.jpg' },
+    { title: 'The Color of Money',                   meta: '1986', thumb: 'https://image.tmdb.org/t/p/w92/7ReMwMgrZEMFPvHWMR0LH5r8cBP.jpg' },
+    { title: 'Alien',                                meta: '1979', thumb: 'https://image.tmdb.org/t/p/w92/vfrQk5IPloGg1v9Rzbh2Eg3VGyM.jpg' },
+    { title: 'Twelve Monkeys',                       meta: '1995', thumb: 'https://image.tmdb.org/t/p/w92/6Sj9wDu3YugthXsU0genocvnY2P.jpg' },
+    { title: 'They Live',                            meta: '1988', thumb: 'https://image.tmdb.org/t/p/w92/6putjDjcL98AcbN9Hbfnz3J1oEX.jpg' },
+    { title: 'Aliens',                               meta: '1986', thumb: 'https://image.tmdb.org/t/p/w92/r1x5JGpyqZU8PYhbs4UcrO1Xb6x.jpg' },
+    { title: 'Escape from New York',                 meta: '1981', thumb: 'https://image.tmdb.org/t/p/w92/x6PBMnPnFHiHlhgfEo2DyKLCEFn.jpg' },
+    { title: 'Yojimbo',                              meta: '1961', thumb: 'https://image.tmdb.org/t/p/w92/aJCtkxLLzkk1pnMn9hVP9BuBMGY.jpg' },
+    { title: 'Rocky',                                meta: '1976', thumb: 'https://image.tmdb.org/t/p/w92/cqB3TXJ6UBiQhvGMDRDFMBBkZGE.jpg' },
+    { title: 'A Better Tomorrow',                    meta: '1986', thumb: 'https://image.tmdb.org/t/p/w92/nJSFVFdFPHxFQE4PJKQFALkFgIk.jpg' },
+    { title: 'GoodFellas',                           meta: '1990', thumb: 'https://image.tmdb.org/t/p/w92/aKuFiU82s5ISJpGZp7YkIr3kCUd.jpg' },
+    { title: 'Dune',                                 meta: '2021', thumb: 'https://image.tmdb.org/t/p/w92/d5NXSklXo0qyIYkgV94XAgMIckC.jpg' },
+    { title: 'Dune: Part Two',                       meta: '2024', thumb: 'https://image.tmdb.org/t/p/w92/1pdfLvkbY9ohJlCjQH2CZjjYVvJ.jpg' },
+    { title: 'Blade Runner',                         meta: '1982', thumb: 'https://image.tmdb.org/t/p/w92/63N9uy8nd9j7Eog2axPQ8lbr3Wj.jpg' },
+    { title: 'Raging Bull',                          meta: '1980', thumb: 'https://image.tmdb.org/t/p/w92/x' },
+    { title: 'Lock, Stock and Two Smoking Barrels',  meta: '1998', thumb: 'https://image.tmdb.org/t/p/w92/x' },
+    { title: 'The Departed',                         meta: '2006', thumb: 'https://image.tmdb.org/t/p/w92/nT97ifVT2J1yMQmeq21B73BjZrH.jpg' },
+    { title: '25th Hour',                            meta: '2002', thumb: 'https://image.tmdb.org/t/p/w92/x' },
+    { title: 'The Fly',                              meta: '1986', thumb: 'https://image.tmdb.org/t/p/w92/x' },
+    { title: 'Iron Man',                             meta: '2008', thumb: 'https://image.tmdb.org/t/p/w92/78lPtwv72eTNqFW9COBH0I09xpQ.jpg' },
   ],
   albums: [
     { title: 'What Up, Dog?',        meta: 'Was (Not Was) · 1988',               thumb: null },
@@ -97,24 +107,6 @@ const AVATAR_STYLES = {
   red:   { bg: '#fee2e2', text: '#991b1b' },
 };
 
-// ── localStorage persistence ──────────────────────────────────────────────
-
-const LS_KEY = 'listmania_lists_v1';
-
-function saveLists() {
-  try { localStorage.setItem(LS_KEY, JSON.stringify(lists)); } catch(e) {}
-}
-
-function loadLists() {
-  try {
-    const saved = localStorage.getItem(LS_KEY);
-    if (!saved) return;
-    const parsed = JSON.parse(saved);
-    ['books','films','albums','tv'].forEach(cat => {
-      if (parsed[cat] && Array.isArray(parsed[cat])) lists[cat] = parsed[cat];
-    });
-  } catch(e) {}
-}
 
 // ── State ─────────────────────────────────────────────────────────────────
 
@@ -156,7 +148,6 @@ async function healThumb(img, cat, idx) {
       const newThumb = `https://image.tmdb.org/t/p/w92${hit.poster_path}`;
       img.src = newThumb;
       lists[cat][idx].thumb = newThumb;
-      saveLists();
     } else {
       img.parentElement.innerHTML = EMOJIS[cat];
     }
@@ -222,7 +213,6 @@ function renderMyList(animMap) {
       const i = +btn.dataset.u;
       if (i === 0) return;
       [lists[currentCat][i - 1], lists[currentCat][i]] = [lists[currentCat][i], lists[currentCat][i - 1]];
-      saveLists();
       renderMyList({ [i - 1]: 'item-moved-up', [i]: 'item-moved-down' });
     });
   });
@@ -232,7 +222,6 @@ function renderMyList(animMap) {
       const i = +btn.dataset.d;
       if (i === lists[currentCat].length - 1) return;
       [lists[currentCat][i], lists[currentCat][i + 1]] = [lists[currentCat][i + 1], lists[currentCat][i]];
-      saveLists();
       renderMyList({ [i]: 'item-moved-down', [i + 1]: 'item-moved-up' });
     });
   });
@@ -240,7 +229,6 @@ function renderMyList(animMap) {
   grid.querySelectorAll('[data-x]').forEach(btn => {
     btn.addEventListener('click', () => {
       lists[currentCat].splice(+btn.dataset.x, 1);
-      saveLists();
       renderMyList();
     });
   });
@@ -341,7 +329,6 @@ function initDrag(grid) {
           const item = list.splice(dragIdx, 1)[0];
           const at   = insertPos > dragIdx ? insertPos - 1 : insertPos;
           list.splice(at, 0, item);
-          saveLists();
 
           // Build animation map
           const animMap = {};
@@ -429,19 +416,19 @@ function exportList(fmt) {
 
   if (fmt === 'json') {
     content  = JSON.stringify({ list: catLabel, user: '@Rob', exported: dateStr, items: items.map((item, i) => ({ rank: i + 1, title: item.title, meta: item.meta })) }, null, 2);
-    filename = `listmania-${currentCat}.json`;
+    filename = `marque-${currentCat}.json`;
     mime     = 'application/json';
   } else if (fmt === 'yaml') {
     content  = [`list: ${catLabel}`, `user: "@Rob"`, `exported: ${dateStr}`, `items:`,
       ...items.map((item, i) => `  - rank: ${i + 1}\n    title: "${item.title.replace(/"/g, '\\"')}"\n    meta: "${item.meta.replace(/"/g, '\\"')}"`)
     ].join('\n');
-    filename = `listmania-${currentCat}.yaml`;
+    filename = `marque-${currentCat}.yaml`;
     mime     = 'text/yaml';
   } else if (fmt === 'md') {
-    content  = [`# ${catLabel} — @Rob's top ${items.length}`, ``, `> Exported ${dateStr} from Listmania`, ``,
+    content  = [`# ${catLabel} — @Rob's top ${items.length}`, ``, `> Exported ${dateStr} from Marque.ink`, ``,
       ...items.map((item, i) => `${i + 1}. **${item.title}** — ${item.meta}`)
     ].join('\n');
-    filename = `listmania-${currentCat}.md`;
+    filename = `marque-${currentCat}.md`;
     mime     = 'text/markdown';
   }
 
@@ -464,7 +451,7 @@ async function searchAPI(query, cat) {
     return (data.results || []).slice(0, 7).map(d => ({ title: d.title || d.name, meta: (d.release_date || d.first_air_date || '').slice(0, 4), thumb: d.poster_path ? `https://image.tmdb.org/t/p/w92${d.poster_path}` : null, source: 'TMDB' }));
   }
   if (cat === 'albums') {
-    const res  = await fetch(`https://musicbrainz.org/ws/2/release-group/?query=${encodeURIComponent(query)}&type=album&fmt=json&limit=7`, { headers: { 'User-Agent': 'Listmania/1.0' } });
+    const res  = await fetch(`https://musicbrainz.org/ws/2/release-group/?query=${encodeURIComponent(query)}&type=album&fmt=json&limit=7`, { headers: { 'User-Agent': 'Marque.ink/1.0' } });
     const data = await res.json();
     return (data['release-groups'] || []).slice(0, 7).map(d => ({ title: d.title, meta: [d['artist-credit']?.[0]?.name, (d['first-release-date'] || '').slice(0, 4)].filter(Boolean).join(' · '), thumb: null, source: 'MusicBrainz' }));
   }
@@ -502,7 +489,6 @@ function selectResult(idx) {
   document.getElementById('search-input').value = '';
   searchResults = [];
   closeDropdown();
-  saveLists();
   renderMyList();
 }
 
@@ -583,7 +569,6 @@ document.addEventListener('DOMContentLoaded', () => {
   searchInput.addEventListener('focus', () => { if (searchResults.length) document.getElementById('autocomplete').classList.add('open'); });
   document.addEventListener('click', e => { if (!document.getElementById('add-area').contains(e.target)) closeDropdown(); });
 
-  loadLists();
   renderMyList();
   renderDiscover('all');
   renderMatches();

@@ -1,10 +1,10 @@
-# Listmania — project context for Claude Code
+# Marque.ink — project context for Claude Code
 
 ## What this is
 
-Listmania is a taste-sharing social app where users curate top 50 lists across Books, Films, Albums and TV shows, then discover and match with people who share their cultural sensibility. Think Letterboxd but cross-category, with a taste-matching graph across all categories.
+Marque.ink is a taste-sharing social app where users curate top 50 lists across Books, Films, Albums and TV shows, then discover and match with people who share their cultural sensibility. Think Letterboxd but cross-category, with a taste-matching graph across all categories.
 
-Working name is Listmania. Strong alternative candidate: **curation.ink** (domain confirmed available). Other names under consideration: Wavelength (taken), CultureVulture, Canon/Canonical (taken by Ubuntu).
+Domain **marque.ink** is registered by Rob. Previous working name was Listmania.
 
 The logged-in user in the prototype is **Rob Larkin (@Rob)**.
 
@@ -17,6 +17,19 @@ index.html   — app shell, all views, nav, sidebar
 style.css    — all styles, CSS variables, dark mode, animations, mobile
 app.js       — all data, render functions, drag/drop, search, export
 CLAUDE.md    — this file
+```
+
+Google Analytics tag (G-0Q4K1Z5866) is included in `<head>` via gtag.js:
+
+```html
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-0Q4K1Z5866"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-0Q4K1Z5866');
+</script>
 ```
 
 This is a **zero-dependency static site**. No build step, no npm, no frameworks. Vanilla HTML/CSS/JS only. Hosted on Netlify via GitHub. To run locally: `python3 -m http.server 8080` then open `http://localhost:8080`.
@@ -71,14 +84,6 @@ Current approach:
 - `DROP_LINE` is a single persistent `<div class="drop-line">` element, never recreated
 - `pointerup` commits the move, removes ghost, calls `renderMyList(animMap)`
 - Touch drag uses a 250ms hold timer before activating, allowing scroll to work unimpeded
-
-### localStorage persistence
-Lists are saved to localStorage under the key `listmania_lists_v1` on every mutation (add, remove, reorder via arrows or drag). On page load, `loadLists()` is called before the first render — if localStorage has data it overrides the hardcoded defaults. This means cover art URLs, custom ordering, and any additions persist across page reloads without a backend.
-
-```js
-saveLists()  // call after every mutation
-loadLists()  // called once on DOMContentLoaded before renderMyList()
-```
 
 ### Cover art — hotlink approach
 No images are downloaded or stored locally. Cover art is hotlinked directly from source CDNs:
@@ -139,7 +144,7 @@ Sidebar collapses to sticky top nav bar. Discover grid goes single column. Autoc
 - [ ] Custom categories (v2 — but consider data model compatibility now)
 
 ### Infrastructure
-- [x] localStorage persistence for lists including thumb URLs (done)
+- [ ] Persistence — no localStorage for lists (demo resets on reload); needs backend when ready
 - [ ] Backend / VM — Node.js + Express + PostgreSQL recommended over Supabase
 - [ ] Shareable profile URL Option 2 — `/@Rob` style permanent links (requires backend)
 - [ ] Proxy TMDB API key through backend (currently exposed in frontend)
@@ -182,10 +187,7 @@ The gap: nobody has built the cross-category version. The cross-category taste g
 
 ## Naming status
 
-Working title: **Listmania**
-Best available domain found: **curation.ink** (confirmed available March 2026, ~$3/yr)
-Strong conceptual name (taken): Wavelength
-Other candidates: CultureVulture, Strata, Crit, Savant
+**Name: Marque.ink** — domain registered by Rob (March 2026).
 
 ---
 
@@ -193,7 +195,7 @@ Other candidates: CultureVulture, Strata, Crit, Savant
 
 **Books:** Dune, I Am Legend, The Moon is a Harsh Mistress, Flow My Tears the Policeman Said, Ubik, The Windup Girl, God Emperor of Dune, The Dark Forest, The Stars My Destination, Fall; or Dodge in Hell, The Man in the High Castle, Dune Messiah, Children of Dune, Heretics of Dune, Chapterhouse: Dune, Eon, Thin Air, The Forever War, The Fountainhead, Fahrenheit 451, Valis, The Door into Summer
 
-**Films:** RoboCop, The Color of Money, Alien, Twelve Monkeys, Escape from New York, Aliens, Yojimbo, Rocky, They Live, A Better Tomorrow
+**Films:** RoboCop, The Color of Money, Alien, Twelve Monkeys, They Live, Aliens, Escape from New York, Yojimbo, Rocky, A Better Tomorrow, GoodFellas, Dune (2021), Dune: Part Two, Blade Runner, Raging Bull, Lock Stock and Two Smoking Barrels, The Departed, 25th Hour, The Fly, Iron Man
 
 **Albums:** What Up Dog? (Was Not Was), Electric Ladyland, Elephant, Origin of Symmetry, Led Zeppelin IV, Every Waking Moment, AM
 
