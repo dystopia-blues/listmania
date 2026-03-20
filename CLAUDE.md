@@ -32,7 +32,29 @@ Google Analytics tag (G-0Q4K1Z5866) is included in `<head>` via gtag.js:
 </script>
 ```
 
-This is a **zero-dependency static site**. No build step, no npm, no frameworks. Vanilla HTML/CSS/JS only. Hosted on Netlify via GitHub. To run locally: `python3 -m http.server 8080` then open `http://localhost:8080`.
+This is a **zero-dependency static site**. No build step, no npm, no frameworks. Vanilla HTML/CSS/JS only. To run locally: `python3 -m http.server 8080` then open `http://localhost:8080`.
+
+---
+
+## Hosting & infrastructure
+
+**Live at:** [https://marque.ink](https://marque.ink)
+
+- **Server:** Digital Ocean droplet, Ubuntu 22.04, 1 vCPU / 1 GB RAM, NYC3 region
+- **IP:** `159.203.113.76`
+- **Web server:** Nginx (replaced Apache which was pre-installed on the droplet)
+- **SSL:** Let's Encrypt via Certbot, auto-configured for Nginx
+- **DNS:** Domain `marque.ink` registered at Porkbun, A record pointing to droplet IP
+- **Analytics:** Google Analytics 4 (G-0Q4K1Z5866)
+- **Static files:** served from `/var/www/html/` on the droplet
+- **SSH access:** User `rob` with sudo, root login disabled, password auth disabled
+- **Firewall (UFW):** ports 22 (SSH), 80 (HTTP), 443 (HTTPS) open
+- **Nginx config:** `/etc/nginx/sites-available/listmania` (symlinked to sites-enabled)
+- **Auto-updates disabled:** `unattended-upgrades`, `apt-daily`, and `apt-daily-upgrade` services/timers are disabled to prevent lock conflicts
+
+The droplet is intended to host multiple sites via Nginx server blocks (virtual hosts). Each site gets its own domain, server block config, and document root.
+
+Previously hosted on Netlify via GitHub — migrated to DO droplet in March 2026.
 
 ---
 
@@ -144,11 +166,16 @@ Sidebar collapses to sticky top nav bar. Discover grid goes single column. Autoc
 - [ ] Custom categories (v2 — but consider data model compatibility now)
 
 ### Infrastructure
+- [x] Hosting — Digital Ocean droplet, Nginx, SSL via Let's Encrypt (done March 2026)
+- [x] Domain — `marque.ink` live, DNS via Porkbun A record (done March 2026)
+- [x] Analytics — Google Analytics 4 integrated (done March 2026)
+- [ ] Install Node.js (v20 LTS) + PM2 process manager on droplet
 - [ ] Persistence — no localStorage for lists (demo resets on reload); needs backend when ready
-- [ ] Backend / VM — Node.js + Express + PostgreSQL recommended over Supabase
+- [ ] Backend — Supabase (hosted, free tier) for initial database + auth; migrate to self-hosted Postgres later if needed. Supabase is just Postgres underneath, so `pg_dump`/`pg_restore` to migrate.
 - [ ] Shareable profile URL Option 2 — `/@Rob` style permanent links (requires backend)
 - [ ] Proxy TMDB API key through backend (currently exposed in frontend)
 - [ ] Album cover art storage once backend exists
+- [ ] Set up `www.marque.ink` DNS record + add to Certbot cert
 
 ### Product
 - [ ] Lead category decision: Films vs Books (leaning Films for initial density)
@@ -163,13 +190,17 @@ Sidebar collapses to sticky top nav bar. Discover grid goes single column. Autoc
 |---|---|
 | No HTML5 drag API | Unreliable drop events, iframe issues, elementFromPoint flicker |
 | Pointer Events for drag | Consistent across platforms, setPointerCapture locks drag cleanly |
-| No build step / no frameworks | Keeps it simple, fast to iterate, Netlify deploys in seconds |
+| No build step / no frameworks | Keeps it simple, fast to iterate |
 | 4 categories only (no games) | Focus — games is a different audience, can be added later |
 | `data-i` not `data-idx` | Shorter, consistent with `data-h` for handle |
 | TMDB free public key in frontend | Acceptable for prototype, needs proxying before public launch |
 | animMap passed into renderMyList | Cleaner than post-render DOM queries for animation targeting |
 | `data-theme` on `<html>` for theme | Overrides media query cleanly; inline `<script>` in `<head>` prevents FOUC |
 | `healThumb()` on TMDB onerror | Auto-fixes stale poster paths without user intervention; persists to localStorage |
+| Nginx over Apache | Lighter, simpler reverse proxy config for Node apps, better for multi-site hosting |
+| Digital Ocean over Netlify | Need server-side capabilities for Node backend, multi-site hosting, and future DB |
+| Supabase for initial DB | Managed Postgres + auth, free tier, no lock-in — can `pg_dump` to self-hosted Postgres later |
+| Postgres over MongoDB | Listmania data is relational (users, lists, items, categories, matches); Mongo is memory-heavy on a 1GB droplet |
 
 ---
 
