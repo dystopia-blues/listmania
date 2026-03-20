@@ -2,73 +2,52 @@
 
 const EMOJIS = { books: '📚', films: '🎬', albums: '🎵', tv: '📺' };
 
-const lists = {
-  books: [
-    { title: 'Dune',                            meta: 'Frank Herbert · 1965',           thumb: 'https://covers.openlibrary.org/b/isbn/9780441013593-M.jpg' },
-    { title: 'I Am Legend',                     meta: 'Richard Matheson · 1954',        thumb: 'https://covers.openlibrary.org/b/isbn/9780765357151-M.jpg' },
-    { title: 'The Moon is a Harsh Mistress',    meta: 'Robert A. Heinlein · 1965',      thumb: 'https://covers.openlibrary.org/b/isbn/9780312863555-M.jpg' },
-    { title: 'Flow My Tears, the Policeman Said', meta: 'Philip K. Dick · 1974',        thumb: 'https://covers.openlibrary.org/b/isbn/9780679740407-M.jpg' },
-    { title: 'Ubik',                            meta: 'Philip K. Dick · 1969',          thumb: 'https://covers.openlibrary.org/b/isbn/9780547572291-M.jpg' },
-    { title: 'The Windup Girl',                 meta: 'Paolo Bacigalupi · 2009',        thumb: 'https://covers.openlibrary.org/b/isbn/9781597801584-M.jpg' },
-    { title: 'God Emperor of Dune',             meta: 'Frank Herbert · 1981',           thumb: 'https://covers.openlibrary.org/b/isbn/9780441294060-M.jpg' },
-    { title: 'The Dark Forest',                 meta: '刘慈欣 · 2008',                   thumb: 'https://covers.openlibrary.org/b/isbn/9780765386694-M.jpg' },
-    { title: 'The Stars My Destination',        meta: 'Alfred Bester · 1956',           thumb: 'https://covers.openlibrary.org/b/isbn/9780679767800-M.jpg' },
-    { title: 'Fall; or, Dodge in Hell',         meta: 'Neal Stephenson · 2019',         thumb: 'https://covers.openlibrary.org/b/isbn/9780062458711-M.jpg' },
-    { title: 'The Man in the High Castle',      meta: 'Philip K. Dick · 1962',          thumb: 'https://covers.openlibrary.org/b/isbn/9780547572481-M.jpg' },
-    { title: 'Dune Messiah',                    meta: 'Frank Herbert · 1969',           thumb: 'https://covers.openlibrary.org/b/isbn/9780441172696-M.jpg' },
-    { title: 'Children of Dune',                meta: 'Frank Herbert · 1976',           thumb: 'https://covers.openlibrary.org/b/isbn/9780441104024-M.jpg' },
-    { title: 'Heretics of Dune',                meta: 'Frank Herbert · 1984',           thumb: 'https://covers.openlibrary.org/b/isbn/9780441328000-M.jpg' },
-    { title: 'Chapterhouse: Dune',              meta: 'Frank Herbert · 1985',           thumb: 'https://covers.openlibrary.org/b/isbn/9780441102679-M.jpg' },
-    { title: 'Eon',                             meta: 'Greg Bear · 1985',               thumb: 'https://covers.openlibrary.org/b/isbn/9780765319197-M.jpg' },
-    { title: 'Thin Air',                        meta: 'Richard K. Morgan · 2018',       thumb: 'https://covers.openlibrary.org/b/isbn/9780575092389-M.jpg' },
-    { title: 'The Forever War',                 meta: 'Joe Haldeman · 1974',            thumb: 'https://covers.openlibrary.org/b/isbn/9780312536633-M.jpg' },
-    { title: 'The Fountainhead',                meta: 'Ayn Rand · 1943',                thumb: 'https://covers.openlibrary.org/b/isbn/9780451191151-M.jpg' },
-    { title: 'Fahrenheit 451',                  meta: 'Ray Bradbury · 1953',            thumb: 'https://covers.openlibrary.org/b/isbn/9781451673319-M.jpg' },
-    { title: 'Valis',                           meta: 'Philip K. Dick · 1981',          thumb: 'https://covers.openlibrary.org/b/isbn/9780679734529-M.jpg' },
-    { title: 'The Door into Summer',            meta: 'Robert A. Heinlein · 1957',      thumb: 'https://covers.openlibrary.org/b/isbn/9780345330123-M.jpg' },
-  ],
-  films: [
-    { title: 'RoboCop',                              meta: '1987', thumb: 'https://image.tmdb.org/t/p/w92/dDwuD4v7gBomJnlzUMkFEjOjJuD.jpg' },
-    { title: 'The Color of Money',                   meta: '1986', thumb: 'https://image.tmdb.org/t/p/w92/7ReMwMgrZEMFPvHWMR0LH5r8cBP.jpg' },
-    { title: 'Alien',                                meta: '1979', thumb: 'https://image.tmdb.org/t/p/w92/vfrQk5IPloGg1v9Rzbh2Eg3VGyM.jpg' },
-    { title: 'Twelve Monkeys',                       meta: '1995', thumb: 'https://image.tmdb.org/t/p/w92/6Sj9wDu3YugthXsU0genocvnY2P.jpg' },
-    { title: 'They Live',                            meta: '1988', thumb: 'https://image.tmdb.org/t/p/w92/6putjDjcL98AcbN9Hbfnz3J1oEX.jpg' },
-    { title: 'Aliens',                               meta: '1986', thumb: 'https://image.tmdb.org/t/p/w92/r1x5JGpyqZU8PYhbs4UcrO1Xb6x.jpg' },
-    { title: 'Escape from New York',                 meta: '1981', thumb: 'https://image.tmdb.org/t/p/w92/x6PBMnPnFHiHlhgfEo2DyKLCEFn.jpg' },
-    { title: 'Yojimbo',                              meta: '1961', thumb: 'https://image.tmdb.org/t/p/w92/aJCtkxLLzkk1pnMn9hVP9BuBMGY.jpg' },
-    { title: 'Rocky',                                meta: '1976', thumb: 'https://image.tmdb.org/t/p/w92/cqB3TXJ6UBiQhvGMDRDFMBBkZGE.jpg' },
-    { title: 'A Better Tomorrow',                    meta: '1986', thumb: 'https://image.tmdb.org/t/p/w92/nJSFVFdFPHxFQE4PJKQFALkFgIk.jpg' },
-    { title: 'GoodFellas',                           meta: '1990', thumb: 'https://image.tmdb.org/t/p/w92/aKuFiU82s5ISJpGZp7YkIr3kCUd.jpg' },
-    { title: 'Dune',                                 meta: '2021', thumb: 'https://image.tmdb.org/t/p/w92/d5NXSklXo0qyIYkgV94XAgMIckC.jpg' },
-    { title: 'Dune: Part Two',                       meta: '2024', thumb: 'https://image.tmdb.org/t/p/w92/1pdfLvkbY9ohJlCjQH2CZjjYVvJ.jpg' },
-    { title: 'Blade Runner',                         meta: '1982', thumb: 'https://image.tmdb.org/t/p/w92/63N9uy8nd9j7Eog2axPQ8lbr3Wj.jpg' },
-    { title: 'Raging Bull',                          meta: '1980', thumb: 'https://image.tmdb.org/t/p/w92/x' },
-    { title: 'Lock, Stock and Two Smoking Barrels',  meta: '1998', thumb: 'https://image.tmdb.org/t/p/w92/x' },
-    { title: 'The Departed',                         meta: '2006', thumb: 'https://image.tmdb.org/t/p/w92/nT97ifVT2J1yMQmeq21B73BjZrH.jpg' },
-    { title: '25th Hour',                            meta: '2002', thumb: 'https://image.tmdb.org/t/p/w92/x' },
-    { title: 'The Fly',                              meta: '1986', thumb: 'https://image.tmdb.org/t/p/w92/x' },
-    { title: 'Iron Man',                             meta: '2008', thumb: 'https://image.tmdb.org/t/p/w92/78lPtwv72eTNqFW9COBH0I09xpQ.jpg' },
-  ],
-  albums: [
-    { title: 'What Up, Dog?',        meta: 'Was (Not Was) · 1988',               thumb: null },
-    { title: 'Electric Ladyland',    meta: 'The Jimi Hendrix Experience · 1968',  thumb: null },
-    { title: 'Elephant',             meta: 'The White Stripes · 2003',            thumb: null },
-    { title: 'Origin of Symmetry',   meta: 'Muse · 2001',                         thumb: null },
-    { title: 'Led Zeppelin IV',      meta: 'Led Zeppelin · 1971',                 thumb: null },
-    { title: 'Every Waking Moment',  meta: 'Citizen Cope · 2006',                 thumb: null },
-    { title: 'AM',                   meta: 'Arctic Monkeys · 2013',               thumb: null },
-  ],
-  tv: [
-    { title: 'The Wire',             meta: 'HBO · 2002–2008', thumb: 'https://image.tmdb.org/t/p/w92/4lbclFySvugI51fwsyxBTOm4DqK.jpg' },
-    { title: 'Battlestar Galactica', meta: '2004',            thumb: 'https://image.tmdb.org/t/p/w92/xYqpW4q6yUFQPVMRxFqNQCOE3Rh.jpg' },
-    { title: 'Breaking Bad',         meta: '2008',            thumb: 'https://image.tmdb.org/t/p/w92/ggFHVNu6YYI5L9pCfOacjizRGt.jpg' },
-    { title: 'Westworld',            meta: '2016',            thumb: 'https://image.tmdb.org/t/p/w92/8MfgyFHf7XEboZJPZXCIDqqiz6e.jpg' },
-    { title: 'Duckman',              meta: '1994',            thumb: null },
-    { title: 'BoJack Horseman',      meta: '2014',            thumb: 'https://image.tmdb.org/t/p/w92/pB9D2HJFhGSAkMrVvNDL4MOPZ3F.jpg' },
-    { title: 'Travelers',            meta: '2016',            thumb: 'https://image.tmdb.org/t/p/w92/2GGJl3RMPKQ7NqC1l1BrMxRgxv7.jpg' },
-    { title: 'Red Dwarf',            meta: '1988',            thumb: 'https://image.tmdb.org/t/p/w92/lBKjchqCODUMJAFJnJOWXF0NQKX.jpg' },
-  ],
-};
+let lists = { books: [], films: [], albums: [], tv: [] };
+
+// ── API ───────────────────────────────────────────────────────────────────
+
+const API_BASE    = 'https://marque.ink/api';
+const CURRENT_USER = 'rob';
+
+async function apiGet(path) {
+  const res = await fetch(`${API_BASE}${path}`);
+  if (!res.ok) throw new Error(`API error: ${res.status}`);
+  return res.json();
+}
+
+async function apiPut(path, body) {
+  const res = await fetch(`${API_BASE}${path}`, {
+    method:  'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body:    JSON.stringify(body),
+  });
+  if (!res.ok) throw new Error(`API error: ${res.status}`);
+  return res.json();
+}
+
+async function loadListsFromAPI() {
+  try {
+    const data = await apiGet(`/lists/${CURRENT_USER}`);
+    lists.books  = data.books  || [];
+    lists.films  = data.films  || [];
+    lists.albums = data.albums || [];
+    lists.tv     = data.tv     || [];
+  } catch (err) {
+    console.error('Failed to load lists from API:', err);
+    const saved = localStorage.getItem('lists');
+    if (saved) Object.assign(lists, JSON.parse(saved));
+  }
+  renderMyList();
+}
+
+async function saveLists(cat = currentCat) {
+  localStorage.setItem('lists', JSON.stringify(lists));
+  try {
+    await apiPut(`/lists/${CURRENT_USER}/${cat}`, lists[cat]);
+  } catch (err) {
+    console.error('Failed to save to API:', err);
+  }
+}
 
 const discoverData = [
   { name: 'Priya K.', handle: '@priya', color: 'blue', cat: 'books', items: ['Foundation', "Childhood's End", 'The Left Hand of Darkness', 'Solaris', 'Hyperion'] },
@@ -148,6 +127,7 @@ async function healThumb(img, cat, idx) {
       const newThumb = `https://image.tmdb.org/t/p/w92${hit.poster_path}`;
       img.src = newThumb;
       lists[cat][idx].thumb = newThumb;
+      saveLists(cat);
     } else {
       img.parentElement.innerHTML = EMOJIS[cat];
     }
@@ -213,6 +193,7 @@ function renderMyList(animMap) {
       const i = +btn.dataset.u;
       if (i === 0) return;
       [lists[currentCat][i - 1], lists[currentCat][i]] = [lists[currentCat][i], lists[currentCat][i - 1]];
+      saveLists();
       renderMyList({ [i - 1]: 'item-moved-up', [i]: 'item-moved-down' });
     });
   });
@@ -222,6 +203,7 @@ function renderMyList(animMap) {
       const i = +btn.dataset.d;
       if (i === lists[currentCat].length - 1) return;
       [lists[currentCat][i], lists[currentCat][i + 1]] = [lists[currentCat][i + 1], lists[currentCat][i]];
+      saveLists();
       renderMyList({ [i]: 'item-moved-down', [i + 1]: 'item-moved-up' });
     });
   });
@@ -229,6 +211,7 @@ function renderMyList(animMap) {
   grid.querySelectorAll('[data-x]').forEach(btn => {
     btn.addEventListener('click', () => {
       lists[currentCat].splice(+btn.dataset.x, 1);
+      saveLists();
       renderMyList();
     });
   });
@@ -329,6 +312,7 @@ function initDrag(grid) {
           const item = list.splice(dragIdx, 1)[0];
           const at   = insertPos > dragIdx ? insertPos - 1 : insertPos;
           list.splice(at, 0, item);
+          saveLists();
 
           // Build animation map
           const animMap = {};
@@ -489,6 +473,7 @@ function selectResult(idx) {
   document.getElementById('search-input').value = '';
   searchResults = [];
   closeDropdown();
+  saveLists();
   renderMyList();
 }
 
@@ -569,10 +554,10 @@ document.addEventListener('DOMContentLoaded', () => {
   searchInput.addEventListener('focus', () => { if (searchResults.length) document.getElementById('autocomplete').classList.add('open'); });
   document.addEventListener('click', e => { if (!document.getElementById('add-area').contains(e.target)) closeDropdown(); });
 
-  renderMyList();
   renderDiscover('all');
   renderMatches();
   updateProfileCounts();
+  loadListsFromAPI();
 
   // ── Theme toggle ──────────────────────────────────────────────────────────
   const SUN_SVG  = `<svg width="14" height="14" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="3" fill="currentColor"/><path d="M8 1v2M8 13v2M1 8h2M13 8h2M3.05 3.05l1.41 1.41M11.54 11.54l1.41 1.41M3.05 12.95l1.41-1.41M11.54 4.46l1.41-1.41" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>`;
