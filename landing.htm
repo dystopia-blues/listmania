@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Marque.ink — Curate your taste</title>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-0Q4K1Z5866"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-0Q4K1Z5866');
+  </script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:      #ffffff;
+      --bg2:     #f7f6f3;
+      --bg3:     #f0efe9;
+      --text:    #1a1a18;
+      --text2:   #6b6a65;
+      --text3:   #a09f9a;
+      --border:  rgba(0,0,0,0.1);
+      --border2: rgba(0,0,0,0.18);
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg:     #141413;
+        --bg2:    #1e1d1b;
+        --bg3:    #252421;
+        --text:   #e8e6df;
+        --text2:  #9a9890;
+        --text3:  #5e5d58;
+        --border: rgba(255,255,255,0.08);
+        --border2:rgba(255,255,255,0.14);
+      }
+    }
+
+    html, body { height: 100%; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      font-size: 15px;
+      color: var(--text);
+      background: var(--bg3);
+      -webkit-font-smoothing: antialiased;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+
+    /* ── Nav ── */
+    nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 20px 40px;
+      background: var(--bg);
+      border-bottom: 0.5px solid var(--border);
+    }
+
+    .logo { font-size: 17px; font-weight: 600; letter-spacing: -0.4px; color: var(--text); text-decoration: none; }
+    .logo-muted { opacity: 0.35; font-weight: 400; }
+
+    .nav-cta {
+      display: flex; align-items: center; gap: 12px;
+    }
+    .btn-ghost {
+      font-size: 13px; font-weight: 500; color: var(--text2); text-decoration: none;
+      padding: 7px 16px; border-radius: 100px; border: 0.5px solid var(--border2);
+      transition: all 0.13s;
+    }
+    .btn-ghost:hover { color: var(--text); border-color: var(--text); }
+    .btn-solid {
+      font-size: 13px; font-weight: 500; color: var(--bg); background: var(--text);
+      text-decoration: none; padding: 7px 16px; border-radius: 100px;
+      transition: opacity 0.13s;
+    }
+    .btn-solid:hover { opacity: 0.8; }
+
+    /* ── Hero ── */
+    .hero {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 80px 24px 60px;
+    }
+
+    .hero-eyebrow {
+      font-size: 11px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase;
+      color: var(--text3); margin-bottom: 24px;
+    }
+
+    .hero-title {
+      font-size: clamp(36px, 6vw, 64px);
+      font-weight: 600;
+      letter-spacing: -1.5px;
+      line-height: 1.1;
+      max-width: 720px;
+      margin-bottom: 20px;
+    }
+
+    .hero-sub {
+      font-size: clamp(15px, 2vw, 18px);
+      color: var(--text2);
+      max-width: 480px;
+      line-height: 1.6;
+      margin-bottom: 40px;
+    }
+
+    .hero-actions {
+      display: flex; gap: 12px; align-items: center; flex-wrap: wrap; justify-content: center;
+    }
+    .hero-actions .btn-solid { font-size: 14px; padding: 10px 24px; }
+    .hero-actions .btn-ghost { font-size: 14px; padding: 10px 24px; }
+
+    /* ── Categories strip ── */
+    .cats {
+      display: flex; gap: 8px; justify-content: center; flex-wrap: wrap;
+      margin-top: 56px;
+    }
+    .cat-pill {
+      display: flex; align-items: center; gap: 6px;
+      font-size: 12px; font-weight: 500; color: var(--text2);
+      padding: 6px 14px; border-radius: 100px;
+      border: 0.5px solid var(--border2);
+      background: var(--bg);
+    }
+
+    /* ── Feature grid ── */
+    .features {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 1px;
+      background: var(--border);
+      border-top: 0.5px solid var(--border);
+      border-bottom: 0.5px solid var(--border);
+    }
+    .feature {
+      background: var(--bg);
+      padding: 36px 32px;
+    }
+    .feature-icon { font-size: 24px; margin-bottom: 14px; }
+    .feature-title { font-size: 14px; font-weight: 600; margin-bottom: 6px; letter-spacing: -0.2px; }
+    .feature-desc { font-size: 13px; color: var(--text2); line-height: 1.55; }
+
+    /* ── Footer ── */
+    footer {
+      text-align: center;
+      padding: 24px;
+      font-size: 12px;
+      color: var(--text3);
+      background: var(--bg);
+      border-top: 0.5px solid var(--border);
+    }
+
+    @media (max-width: 600px) {
+      nav { padding: 16px 20px; }
+      .hero { padding: 60px 20px 48px; }
+      .features { grid-template-columns: 1fr; }
+      .feature { padding: 28px 24px; }
+    }
+  </style>
+</head>
+<body>
+
+  <nav>
+    <a class="logo" href="/">Marque<span class="logo-muted">.ink</span></a>
+    <div class="nav-cta">
+      <a class="btn-ghost" href="/index.html">Sign in</a>
+      <a class="btn-solid" href="/index.html">Get started</a>
+    </div>
+  </nav>
+
+  <section class="hero">
+    <div class="hero-eyebrow">Taste is personal. Share it anyway.</div>
+    <h1 class="hero-title">Curate your top 50.<br>Find your people.</h1>
+    <p class="hero-sub">Marque.ink is where you build definitive lists across books, films, albums and TV — then discover who shares your taste.</p>
+    <div class="hero-actions">
+      <a class="btn-solid" href="/index.html">Start curating</a>
+      <a class="btn-ghost" href="/index.html">See an example</a>
+    </div>
+    <div class="cats">
+      <div class="cat-pill">📚 Books</div>
+      <div class="cat-pill">🎬 Films</div>
+      <div class="cat-pill">🎵 Albums</div>
+      <div class="cat-pill">📺 TV shows</div>
+    </div>
+  </section>
+
+  <div class="features">
+    <div class="feature">
+      <div class="feature-icon">📋</div>
+      <div class="feature-title">Your definitive lists</div>
+      <div class="feature-desc">Rank up to 50 across every category. Drag to reorder. Change your mind. It's supposed to be hard.</div>
+    </div>
+    <div class="feature">
+      <div class="feature-icon">🔍</div>
+      <div class="feature-title">Discover taste</div>
+      <div class="feature-desc">Browse what others are ranking. Filter by category. Find the people who loved the same obscure things you did.</div>
+    </div>
+    <div class="feature">
+      <div class="feature-icon">⚡</div>
+      <div class="feature-title">Taste matching</div>
+      <div class="feature-desc">We score your compatibility across all categories — not just films, not just music, but the whole picture.</div>
+    </div>
+    <div class="feature">
+      <div class="feature-icon">🌐</div>
+      <div class="feature-title">Cross-category graph</div>
+      <div class="feature-desc">The person who loves Dune and Blade Runner probably loves Electric Ladyland too. We find that signal.</div>
+    </div>
+  </div>
+
+  <footer>
+    &copy; 2026 Marque.ink
+  </footer>
+
+</body>
+</html>
