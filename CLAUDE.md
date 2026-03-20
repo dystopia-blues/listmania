@@ -19,7 +19,13 @@ app.js       — all data, render functions, drag/drop, search, export
 CLAUDE.md    — this file
 ```
 
-Google Analytics tag (G-0Q4K1Z5866) is included in `<head>` via gtag.js:
+**`landing.htm`** — splash/marketing page. Standalone file, inlines all CSS, same design tokens as the app.
+- Eyebrow: *"Art is subjective, but everyone's a critic..."*
+- Headline: *"Curate, rank and share your top movies, books, albums and shows."*
+- 3 feature cards: Your definitive lists, Discover taste, Taste matching
+- Both CTAs link to `/index.html` (update when auth/routing exists)
+
+Google Analytics tag (G-0Q4K1Z5866) is included in `<head>` of both `index.html` and `landing.htm` via gtag.js:
 
 ```html
 <!-- Google tag (gtag.js) -->
