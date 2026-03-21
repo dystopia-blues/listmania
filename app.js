@@ -6,19 +6,32 @@ let lists = { books: [], films: [], albums: [], tv: [] };
 
 // ── API ───────────────────────────────────────────────────────────────────
 
-const API_BASE    = 'https://marque.ink/api';
-const CURRENT_USER = 'rob';
+const API_BASE = 'https://marque.ink/api';
+
+const SUPABASE_URL = 'https://ekokbndwfwiygolwycia.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_hvdbnQLxqJWwA3GKRG3j_A_TqLYSsPw';
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+let currentUser = null; // { id, handle, display_name, email, avatar_color } when logged in
+
+async function getAuthHeaders() {
+  const { data: { session } } = await sb.auth.getSession();
+  if (!session) return {};
+  return { 'Authorization': `Bearer ${session.access_token}` };
+}
 
 async function apiGet(path) {
-  const res = await fetch(`${API_BASE}${path}`);
+  const headers = await getAuthHeaders();
+  const res = await fetch(`${API_BASE}${path}`, { headers });
   if (!res.ok) throw new Error(`API error: ${res.status}`);
   return res.json();
 }
 
 async function apiPut(path, body) {
+  const headers = await getAuthHeaders();
   const res = await fetch(`${API_BASE}${path}`, {
     method:  'PUT',
-    headers: { 'Content-Type': 'application/json' },
+    headers: { 'Content-Type': 'application/json', ...headers },
     body:    JSON.stringify(body),
   });
   if (!res.ok) throw new Error(`API error: ${res.status}`);
@@ -26,8 +39,13 @@ async function apiPut(path, body) {
 }
 
 async function loadListsFromAPI() {
+  if (!currentUser) {
+    lists = { books: [], films: [], albums: [], tv: [] };
+    renderMyList();
+    return;
+  }
   try {
-    const data = await apiGet(`/lists/${CURRENT_USER}`);
+    const data = await apiGet(`/lists/${currentUser.handle}`);
     lists.books  = data.books  || [];
     lists.films  = data.films  || [];
     lists.albums = data.albums || [];
@@ -41,9 +59,10 @@ async function loadListsFromAPI() {
 }
 
 async function saveLists(cat = currentCat) {
+  if (!currentUser) return;
   localStorage.setItem('lists', JSON.stringify(lists));
   try {
-    await apiPut(`/lists/${CURRENT_USER}/${cat}`, lists[cat]);
+    await apiPut(`/lists/${currentUser.handle}/${cat}`, lists[cat]);
   } catch (err) {
     console.error('Failed to save to API:', err);
   }
@@ -220,8 +239,8 @@ function renderMyList(animMap) {
 
   const full = items.length >= 50;
   const input = document.getElementById('search-input');
-  input.disabled = full;
-  input.placeholder = full ? 'List is full' : 'Search to add…';
+  input.disabled = full || !currentUser;
+  input.placeholder = !currentUser ? 'Sign in to add items' : (full ? 'List is full' : 'Search to add…');
   document.getElementById('limit-note').style.display = full ? 'block' : 'none';
 
   updateProfileCounts();
@@ -477,6 +496,122 @@ function selectResult(idx) {
   renderMyList();
 }
 
+// ── Auth UI ───────────────────────────────────────────────────────────────
+
+function showAuthModal(view = 'login') {
+  document.getElementById('auth-overlay').classList.add('open');
+  document.getElementById('auth-login').style.display  = view === 'login'  ? '' : 'none';
+  document.getElementById('auth-signup').style.display = view === 'signup' ? '' : 'none';
+  document.getElementById('auth-forgot').style.display = view === 'forgot' ? '' : 'none';
+  document.querySelectorAll('.auth-error, .auth-success').forEach(el => el.textContent = '');
+}
+
+function hideAuthModal() {
+  document.getElementById('auth-overlay').classList.remove('open');
+}
+
+async function handleLogin() {
+  const email    = document.getElementById('login-email').value.trim();
+  const password = document.getElementById('login-password').value;
+  const errorEl  = document.getElementById('login-error');
+  errorEl.textContent = '';
+  if (!email || !password) { errorEl.textContent = 'Email and password required.'; return; }
+  const { error } = await sb.auth.signInWithPassword({ email, password });
+  if (error) { errorEl.textContent = error.message; return; }
+  hideAuthModal();
+  await initSession();
+}
+
+async function handleSignup() {
+  const name     = document.getElementById('signup-name').value.trim();
+  const handle   = document.getElementById('signup-handle').value.trim().toLowerCase();
+  const email    = document.getElementById('signup-email').value.trim();
+  const password = document.getElementById('signup-password').value;
+  const errorEl  = document.getElementById('signup-error');
+  errorEl.textContent = '';
+  if (!name || !handle || !email || !password) { errorEl.textContent = 'All fields are required.'; return; }
+  if (!/^[a-z0-9_]{3,20}$/.test(handle)) { errorEl.textContent = 'Handle: 3-20 lowercase letters, numbers, or underscores.'; return; }
+  if (password.length < 6) { errorEl.textContent = 'Password must be at least 6 characters.'; return; }
+
+  const { error: authError } = await sb.auth.signUp({ email, password });
+  if (authError) { errorEl.textContent = authError.message; return; }
+
+  try {
+    const headers = { 'Content-Type': 'application/json' };
+    const { data: { session } } = await sb.auth.getSession();
+    if (session) headers['Authorization'] = `Bearer ${session.access_token}`;
+    const res = await fetch(`${API_BASE}/users`, { method: 'POST', headers, body: JSON.stringify({ handle, display_name: name }) });
+    const result = await res.json();
+    if (!res.ok) { errorEl.textContent = result.error || 'Failed to create profile.'; return; }
+  } catch {
+    errorEl.textContent = 'Failed to create profile. Please try again.';
+    return;
+  }
+
+  hideAuthModal();
+  await initSession();
+}
+
+async function handleForgotPassword() {
+  const email    = document.getElementById('forgot-email').value.trim();
+  const errorEl  = document.getElementById('forgot-error');
+  const successEl = document.getElementById('forgot-success');
+  errorEl.textContent = '';
+  successEl.textContent = '';
+  if (!email) { errorEl.textContent = 'Enter your email address.'; return; }
+  const { error } = await sb.auth.resetPasswordForEmail(email, { redirectTo: 'https://marque.ink' });
+  if (error) { errorEl.textContent = error.message; return; }
+  successEl.textContent = 'Check your email for a reset link.';
+}
+
+async function handleLogout() {
+  await sb.auth.signOut();
+  currentUser = null;
+  lists = { books: [], films: [], albums: [], tv: [] };
+  updateAuthUI();
+  renderMyList();
+}
+
+async function initSession() {
+  const { data: { session } } = await sb.auth.getSession();
+  if (session) {
+    try {
+      currentUser = await apiGet('/me');
+    } catch {
+      currentUser = null;
+    }
+  } else {
+    currentUser = null;
+  }
+  updateAuthUI();
+  await loadListsFromAPI();
+}
+
+function updateAuthUI() {
+  const authArea = document.getElementById('auth-area');
+  if (!authArea) return;
+
+  if (currentUser) {
+    authArea.innerHTML = `
+      <div class="user-badge">
+        <div class="user-avatar" style="${avatarStyle(currentUser.avatar_color || 'blue')}">${initials(currentUser.display_name)}</div>
+        <span class="user-handle">@${currentUser.handle}</span>
+      </div>
+      <button class="logout-btn" id="logout-btn">Sign out</button>
+    `;
+    document.getElementById('logout-btn').addEventListener('click', handleLogout);
+  } else {
+    authArea.innerHTML = `<button class="login-btn" id="login-btn">Sign in</button>`;
+    document.getElementById('login-btn').addEventListener('click', () => showAuthModal('login'));
+  }
+
+  const searchInput = document.getElementById('search-input');
+  if (searchInput) {
+    searchInput.disabled = !currentUser || lists[currentCat].length >= 50;
+    if (!currentUser) searchInput.placeholder = 'Sign in to add items';
+  }
+}
+
 // ── Nav & Tabs ────────────────────────────────────────────────────────────
 
 function showView(id) {
@@ -554,10 +689,38 @@ document.addEventListener('DOMContentLoaded', () => {
   searchInput.addEventListener('focus', () => { if (searchResults.length) document.getElementById('autocomplete').classList.add('open'); });
   document.addEventListener('click', e => { if (!document.getElementById('add-area').contains(e.target)) closeDropdown(); });
 
+  // Auth modal navigation
+  document.getElementById('auth-close').addEventListener('click', hideAuthModal);
+  document.getElementById('auth-overlay').addEventListener('click', e => { if (e.target === e.currentTarget) hideAuthModal(); });
+  document.getElementById('show-signup').addEventListener('click', e => { e.preventDefault(); showAuthModal('signup'); });
+  document.getElementById('show-login-from-signup').addEventListener('click', e => { e.preventDefault(); showAuthModal('login'); });
+  document.getElementById('show-forgot').addEventListener('click', e => { e.preventDefault(); showAuthModal('forgot'); });
+  document.getElementById('show-login-from-forgot').addEventListener('click', e => { e.preventDefault(); showAuthModal('login'); });
+
+  // Auth form submissions
+  document.getElementById('login-submit').addEventListener('click', handleLogin);
+  document.getElementById('signup-submit').addEventListener('click', handleSignup);
+  document.getElementById('forgot-submit').addEventListener('click', handleForgotPassword);
+
+  // Enter key on auth inputs
+  document.getElementById('login-password').addEventListener('keydown', e => { if (e.key === 'Enter') handleLogin(); });
+  document.getElementById('signup-password').addEventListener('keydown', e => { if (e.key === 'Enter') handleSignup(); });
+  document.getElementById('forgot-email').addEventListener('keydown', e => { if (e.key === 'Enter') handleForgotPassword(); });
+
+  // Auth state changes (token refresh, page reload)
+  sb.auth.onAuthStateChange(async (event, session) => {
+    if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
+      if (!currentUser) await initSession();
+    }
+    if (event === 'SIGNED_OUT') {
+      currentUser = null;
+      updateAuthUI();
+    }
+  });
+
   renderDiscover('all');
   renderMatches();
-  updateProfileCounts();
-  loadListsFromAPI();
+  initSession(); // calls loadListsFromAPI() → renderMyList() → updateProfileCounts()
 
   // ── Theme toggle ──────────────────────────────────────────────────────────
   const SUN_SVG  = `<svg width="14" height="14" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="3" fill="currentColor"/><path d="M8 1v2M8 13v2M1 8h2M13 8h2M3.05 3.05l1.41 1.41M11.54 11.54l1.41 1.41M3.05 12.95l1.41-1.41M11.54 4.46l1.41-1.41" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>`;

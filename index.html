@@ -13,6 +13,7 @@
     gtag('config', 'G-0Q4K1Z5866');
   </script>
   <link rel="stylesheet" href="style.css"/>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
   <script>(function(){var t=localStorage.getItem('theme');if(t)document.documentElement.dataset.theme=t;}());</script>
 </head>
 <body>
@@ -45,13 +46,7 @@
           Profile
         </div>
       </nav>
-      <div class="sidebar-footer">
-        <div class="avatar">RL</div>
-        <div>
-          <div class="profile-name">Rob Larkin</div>
-          <div class="profile-handle">@Rob</div>
-        </div>
-      </div>
+      <div id="auth-area" class="sidebar-footer"></div>
     </aside>
 
     <!-- MAIN -->
@@ -144,5 +139,53 @@
     </main>
   </div>
   <script src="app.js"></script>
+
+  <!-- Auth Modal -->
+  <div class="auth-overlay" id="auth-overlay">
+    <div class="auth-modal">
+      <button class="auth-close" id="auth-close">&times;</button>
+
+      <!-- Login form -->
+      <div class="auth-form" id="auth-login">
+        <h2>Sign in to Marque</h2>
+        <p class="auth-tagline">Art is subjective, but everyone's a critic...</p>
+        <div class="auth-error" id="login-error"></div>
+        <input type="email" id="login-email" placeholder="Email" autocomplete="email"/>
+        <input type="password" id="login-password" placeholder="Password" autocomplete="current-password"/>
+        <button class="auth-submit" id="login-submit">Sign in</button>
+        <div class="auth-links">
+          <a href="#" id="show-signup">Create an account</a>
+          <a href="#" id="show-forgot">Forgot password?</a>
+        </div>
+      </div>
+
+      <!-- Signup form -->
+      <div class="auth-form" id="auth-signup" style="display:none">
+        <h2>Create your account</h2>
+        <div class="auth-error" id="signup-error"></div>
+        <input type="text" id="signup-name" placeholder="Display name" autocomplete="name"/>
+        <input type="text" id="signup-handle" placeholder="Handle (e.g. rob)" autocomplete="username" pattern="[a-z0-9_]{3,20}"/>
+        <input type="email" id="signup-email" placeholder="Email" autocomplete="email"/>
+        <input type="password" id="signup-password" placeholder="Password (min 6 chars)" autocomplete="new-password"/>
+        <button class="auth-submit" id="signup-submit">Create account</button>
+        <div class="auth-links">
+          <a href="#" id="show-login-from-signup">Already have an account? Sign in</a>
+        </div>
+      </div>
+
+      <!-- Forgot password form -->
+      <div class="auth-form" id="auth-forgot" style="display:none">
+        <h2>Reset your password</h2>
+        <p class="auth-tagline">We'll send you a link to reset your password.</p>
+        <div class="auth-error" id="forgot-error"></div>
+        <div class="auth-success" id="forgot-success"></div>
+        <input type="email" id="forgot-email" placeholder="Email" autocomplete="email"/>
+        <button class="auth-submit" id="forgot-submit">Send reset link</button>
+        <div class="auth-links">
+          <a href="#" id="show-login-from-forgot">Back to sign in</a>
+        </div>
+      </div>
+    </div>
+  </div>
 </body>
 </html>

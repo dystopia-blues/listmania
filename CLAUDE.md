@@ -74,17 +74,51 @@ Four views rendered as `<section class="view">` elements, toggled via `.active` 
 - `profile` — Rob's profile with stats and list summaries
 
 ### Data model
-All data lives in `app.js` as plain JS objects. Lists are persisted to localStorage.
+
+Lists are persisted in Supabase (Postgres) via the Express API. localStorage is used as a fallback only.
 
 ```js
-lists = { books: [{title, meta, thumb}], films: [...], albums: [...], tv: [...] }
+lists = { books: [{title, meta, thumb, source, source_id}], films: [...], albums: [...], tv: [...] }
 // meta format: "Author · Year" (books/albums) or "Year" (films/tv) — year is parsed from meta where needed
+// source: 'tmdb' | 'openlibrary' | 'musicbrainz' | null
+// source_id: string ID from the source API, or null
 discoverData = [{name, handle, color, cat, items[]}]
 matchData = [{name, handle, color, score, shared[], following}]
 ```
 
+`currentUser` is `null` when logged out, or `{ id, handle, display_name, email, avatar_color }` when logged in.
+
 ### Categories
 Currently: Books, Films, Albums, TV shows. Games was removed deliberately — keeping focus tight. Per-category enable/disable toggle is on the to-do list.
+
+---
+
+## Backend
+
+### Express API
+- **URL:** `https://marque.ink/api`
+- **File:** `~/marque-api/index.js` on the droplet
+- **Process manager:** PM2 (`pm2 restart marque-api`)
+- **Endpoints:**
+  - `GET /api/lists/:handle` — returns `{ books, films, albums, tv }` for a user
+  - `PUT /api/lists/:handle/:category` — replaces a category's list (auth-protected, pending Phase 2)
+  - `POST /api/users` — creates user profile after signup (pending Phase 2)
+  - `GET /api/me` — returns current user's profile (pending Phase 2)
+  - `PATCH /api/lists/:handle/:category/visibility` — toggles public/private (pending Phase 2)
+
+### Supabase
+- **Project URL:** `https://ekokbndwfwiygolwycia.supabase.co`
+- **Publishable key (safe in frontend):** `sb_publishable_hvdbnQLxqJWwA3GKRG3j_A_TqLYSsPw`
+- **JWT secret (server-side only):** stored in `~/marque-api/.env` as `SUPABASE_JWT_SECRET`
+- **Tables:** `users` (id, handle, display_name, auth_id, email, avatar_color), `lists` (user_id, category, position, title, meta, thumb, source, source_id, public)
+
+### Auth
+- **Provider:** Supabase Auth (email + password)
+- **Frontend client:** `@supabase/supabase-js@2` loaded via CDN, `const sb = supabase.createClient(...)`
+- **Session:** managed by Supabase JS client (tokens in localStorage, auto-refreshed)
+- **`currentUser`:** null when logged out; `{ id, handle, display_name, email, avatar_color }` when logged in
+- **API auth:** Bearer token injected via `getAuthHeaders()` into every `apiGet`/`apiPut` call
+- **Auth UI:** modal overlay with login / signup / forgot-password forms; `id="auth-area"` in sidebar renders login button or user badge + sign out
 
 ---
 
@@ -160,25 +194,35 @@ Sidebar collapses to sticky top nav bar. Discover grid goes single column. Autoc
 ## To-do list
 
 ### UI / UX
-- [ ] Per-category enable/disable toggle on profile page (users can make individual lists public/private)
-- [ ] Shareable profile URL — Option 1: URL-encoded state (no backend needed as first step)
+- [ ] Per-category public/private toggle on account panel (Phase 5 of auth)
+- [ ] Account panel — change display name, handle, avatar color, password (Phase 5 of auth)
 - [ ] User onboarding flow for new blank-state users
+- [ ] Shareable profile URL — `/@handle` style (requires backend routing)
 - [x] Cover art via hotlinks — TMDB for films/TV, Open Library for books (done)
 - [x] Dark/light mode toggle — sun/moon button in logo bar, persisted to localStorage (done)
 - [x] TMDB poster auto-heal — broken poster URLs are fixed at runtime via `healThumb()` (done)
 - [ ] Album cover art — needs backend or a key'd API (Spotify, iTunes)
 
+### Auth (in progress — see claude-code-handoff-auth.md for full spec)
+- [x] Phase 3: Frontend — Supabase JS client, `getAuthHeaders()`, updated API calls, `currentUser` global (done)
+- [x] Phase 4: Frontend — auth modal (login/signup/forgot), `updateAuthUI()`, `initSession()`, all event listeners (done)
+- [ ] Phase 1: DB schema — Rob must run SQL in Supabase: add `auth_id`, `email`, `avatar_color` to `users`; add `public` to `lists`; create `user_preferences`; enable RLS policies
+- [ ] Phase 2: Express API — Rob must SSH into droplet and update `~/marque-api/index.js`: add auth middleware (JWT verify), `/api/users` signup endpoint, `/api/me` endpoint, protected PUT/DELETE routes, visibility PATCH endpoint; add `SUPABASE_JWT_SECRET` to `.env`; `pm2 restart marque-api`
+- [ ] Phase 5: Account panel UI
+- [ ] Phase 6: Migrate Rob's existing `rob` row — sign up, then `UPDATE users SET auth_id = 'UUID' WHERE handle = 'rob'`
+
 ### Data & search
+- [x] Metadata enrichment scripts — `~/marque-enrich/enrich-metadata.js` + `push-enriched.js` (scripts written, Rob to run)
+- [ ] Run enrichment — `cd ~/marque-enrich && node enrich-metadata.js` then review + `node push-enriched.js`
+- [ ] Add `source` and `source_id` columns to Supabase `lists` table (precondition for enrichment push)
 - [ ] Custom categories (v2 — but consider data model compatibility now)
 
 ### Infrastructure
 - [x] Hosting — Digital Ocean droplet, Nginx, SSL via Let's Encrypt (done March 2026)
 - [x] Domain — `marque.ink` live, DNS via Porkbun A record (done March 2026)
 - [x] Analytics — Google Analytics 4 integrated (done March 2026)
-- [ ] Install Node.js (v20 LTS) + PM2 process manager on droplet
-- [ ] Persistence — no localStorage for lists (demo resets on reload); needs backend when ready
-- [ ] Backend — Supabase (hosted, free tier) for initial database + auth; migrate to self-hosted Postgres later if needed. Supabase is just Postgres underneath, so `pg_dump`/`pg_restore` to migrate.
-- [ ] Shareable profile URL Option 2 — `/@Rob` style permanent links (requires backend)
+- [x] Backend — Node.js + Express + Supabase (Postgres) live at `https://marque.ink/api` (done March 2026)
+- [x] Lists persisted to API — `apiGet`/`apiPut` wired, localStorage as fallback (done)
 - [ ] Proxy TMDB API key through backend (currently exposed in frontend)
 - [ ] Album cover art storage once backend exists
 - [ ] Set up `www.marque.ink` DNS record + add to Certbot cert
@@ -207,6 +251,9 @@ Sidebar collapses to sticky top nav bar. Discover grid goes single column. Autoc
 | Digital Ocean over Netlify | Need server-side capabilities for Node backend, multi-site hosting, and future DB |
 | Supabase for initial DB | Managed Postgres + auth, free tier, no lock-in — can `pg_dump` to self-hosted Postgres later |
 | Postgres over MongoDB | Listmania data is relational (users, lists, items, categories, matches); Mongo is memory-heavy on a 1GB droplet |
+| Supabase Auth (email+password only) | Simple, no OAuth complexity for v1; Supabase handles tokens, refresh, and password reset flows |
+| Supabase JS client in frontend | No build step needed — CDN UMD bundle; handles session persistence and token refresh automatically |
+| `id="auth-area"` replaces hardcoded sidebar footer | Allows `updateAuthUI()` to render login button or user badge dynamically without duplicating HTML |
 
 ---
 
