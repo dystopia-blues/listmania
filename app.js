@@ -9,7 +9,7 @@ let lists = { books: [], films: [], albums: [], tv: [] };
 const API_BASE = 'https://marque.ink/api';
 
 const SUPABASE_URL = 'https://ekokbndwfwiygolwycia.supabase.co';
-const SUPABASE_KEY = 'sb_publishable_hvdbnQLxqJWwA3GKRG3j_A_TqLYSsPw';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVrb2tibmR3ZndpeWdvbHd5Y2lhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQwNDA0OTMsImV4cCI6MjA4OTYxNjQ5M30.5eghZZvrKXYxLD4YtC4a_ltc8DSQYHzmByccmTy9sRo';
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 let currentUser = null; // { id, handle, display_name, email, avatar_color } when logged in
