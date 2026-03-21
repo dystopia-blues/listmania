@@ -163,14 +163,23 @@
       <div class="auth-form" id="auth-signup" style="display:none">
         <h2>Create your account</h2>
         <div class="auth-error" id="signup-error"></div>
-        <input type="text" id="signup-name" placeholder="Display name" autocomplete="name"/>
-        <input type="text" id="signup-handle" placeholder="Handle (e.g. rob)" autocomplete="username" pattern="[a-z0-9_]{3,20}"/>
+        <div class="auth-success" id="signup-success"></div>
         <input type="email" id="signup-email" placeholder="Email" autocomplete="email"/>
         <input type="password" id="signup-password" placeholder="Password (min 6 chars)" autocomplete="new-password"/>
         <button class="auth-submit" id="signup-submit">Create account</button>
         <div class="auth-links">
           <a href="#" id="show-login-from-signup">Already have an account? Sign in</a>
         </div>
+      </div>
+
+      <!-- Complete profile form (shown after email confirmation) -->
+      <div class="auth-form" id="auth-complete-profile" style="display:none">
+        <h2>Complete your profile</h2>
+        <p class="auth-tagline">One last step — pick a name and handle.</p>
+        <div class="auth-error" id="complete-error"></div>
+        <input type="text" id="complete-name" placeholder="Display name" autocomplete="name"/>
+        <input type="text" id="complete-handle" placeholder="Handle (e.g. rob)" autocomplete="username" pattern="[a-z0-9_]{3,20}"/>
+        <button class="auth-submit" id="complete-submit">Let's go</button>
       </div>
 
       <!-- Forgot password form -->

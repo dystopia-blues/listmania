@@ -500,10 +500,14 @@ function selectResult(idx) {
 
 function showAuthModal(view = 'login') {
   document.getElementById('auth-overlay').classList.add('open');
-  document.getElementById('auth-login').style.display  = view === 'login'  ? '' : 'none';
-  document.getElementById('auth-signup').style.display = view === 'signup' ? '' : 'none';
-  document.getElementById('auth-forgot').style.display = view === 'forgot' ? '' : 'none';
+  document.getElementById('auth-login').style.display            = view === 'login'            ? '' : 'none';
+  document.getElementById('auth-signup').style.display           = view === 'signup'           ? '' : 'none';
+  document.getElementById('auth-forgot').style.display           = view === 'forgot'           ? '' : 'none';
+  document.getElementById('auth-complete-profile').style.display = view === 'complete-profile' ? '' : 'none';
   document.querySelectorAll('.auth-error, .auth-success').forEach(el => el.textContent = '');
+  // Hide close button when user must complete profile
+  const closeBtn = document.getElementById('auth-close');
+  if (closeBtn) closeBtn.style.display = view === 'complete-profile' ? 'none' : '';
 }
 
 function hideAuthModal() {
@@ -523,24 +527,42 @@ async function handleLogin() {
 }
 
 async function handleSignup() {
-  const name     = document.getElementById('signup-name').value.trim();
-  const handle   = document.getElementById('signup-handle').value.trim().toLowerCase();
-  const email    = document.getElementById('signup-email').value.trim();
-  const password = document.getElementById('signup-password').value;
-  const errorEl  = document.getElementById('signup-error');
-  errorEl.textContent = '';
-  if (!name || !handle || !email || !password) { errorEl.textContent = 'All fields are required.'; return; }
-  if (!/^[a-z0-9_]{3,20}$/.test(handle)) { errorEl.textContent = 'Handle: 3-20 lowercase letters, numbers, or underscores.'; return; }
+  const email     = document.getElementById('signup-email').value.trim();
+  const password  = document.getElementById('signup-password').value;
+  const errorEl   = document.getElementById('signup-error');
+  const successEl = document.getElementById('signup-success');
+  errorEl.textContent   = '';
+  successEl.textContent = '';
+
+  if (!email || !password) { errorEl.textContent = 'Email and password required.'; return; }
   if (password.length < 6) { errorEl.textContent = 'Password must be at least 6 characters.'; return; }
 
-  const { error: authError } = await sb.auth.signUp({ email, password });
-  if (authError) { errorEl.textContent = authError.message; return; }
+  const { error } = await sb.auth.signUp({ email, password });
+  if (error) { errorEl.textContent = error.message; return; }
+
+  // Email confirmation required — hide form, show message
+  document.getElementById('signup-submit').style.display = 'none';
+  document.querySelectorAll('#auth-signup input').forEach(el => el.style.display = 'none');
+  document.querySelector('#auth-signup .auth-links').style.display = 'none';
+  successEl.textContent = 'Check your email for a confirmation link. You can close this dialog.';
+}
+
+async function handleCompleteProfile() {
+  const name    = document.getElementById('complete-name').value.trim();
+  const handle  = document.getElementById('complete-handle').value.trim().toLowerCase();
+  const errorEl = document.getElementById('complete-error');
+  errorEl.textContent = '';
+
+  if (!name || !handle) { errorEl.textContent = 'Both fields are required.'; return; }
+  if (!/^[a-z0-9_]{3,20}$/.test(handle)) { errorEl.textContent = 'Handle: 3-20 lowercase letters, numbers, or underscores.'; return; }
 
   try {
-    const headers = { 'Content-Type': 'application/json' };
-    const { data: { session } } = await sb.auth.getSession();
-    if (session) headers['Authorization'] = `Bearer ${session.access_token}`;
-    const res = await fetch(`${API_BASE}/users`, { method: 'POST', headers, body: JSON.stringify({ handle, display_name: name }) });
+    const headers = { 'Content-Type': 'application/json', ...(await getAuthHeaders()) };
+    const res = await fetch(`${API_BASE}/users`, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify({ handle, display_name: name })
+    });
     const result = await res.json();
     if (!res.ok) { errorEl.textContent = result.error || 'Failed to create profile.'; return; }
   } catch {
@@ -578,7 +600,10 @@ async function initSession() {
     try {
       currentUser = await apiGet('/me');
     } catch {
+      // 404 = auth exists but no profile row yet — prompt to complete profile
       currentUser = null;
+      showAuthModal('complete-profile');
+      return;
     }
   } else {
     currentUser = null;
@@ -691,7 +716,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Auth modal navigation
   document.getElementById('auth-close').addEventListener('click', hideAuthModal);
-  document.getElementById('auth-overlay').addEventListener('click', e => { if (e.target === e.currentTarget) hideAuthModal(); });
+  document.getElementById('auth-overlay').addEventListener('click', e => {
+    if (e.target !== e.currentTarget) return;
+    const completeForm = document.getElementById('auth-complete-profile');
+    if (completeForm && completeForm.style.display !== 'none') return;
+    hideAuthModal();
+  });
   document.getElementById('show-signup').addEventListener('click', e => { e.preventDefault(); showAuthModal('signup'); });
   document.getElementById('show-login-from-signup').addEventListener('click', e => { e.preventDefault(); showAuthModal('login'); });
   document.getElementById('show-forgot').addEventListener('click', e => { e.preventDefault(); showAuthModal('forgot'); });
@@ -701,11 +731,13 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('login-submit').addEventListener('click', handleLogin);
   document.getElementById('signup-submit').addEventListener('click', handleSignup);
   document.getElementById('forgot-submit').addEventListener('click', handleForgotPassword);
+  document.getElementById('complete-submit').addEventListener('click', handleCompleteProfile);
 
   // Enter key on auth inputs
   document.getElementById('login-password').addEventListener('keydown', e => { if (e.key === 'Enter') handleLogin(); });
   document.getElementById('signup-password').addEventListener('keydown', e => { if (e.key === 'Enter') handleSignup(); });
   document.getElementById('forgot-email').addEventListener('keydown', e => { if (e.key === 'Enter') handleForgotPassword(); });
+  document.getElementById('complete-handle').addEventListener('keydown', e => { if (e.key === 'Enter') handleCompleteProfile(); });
 
   // Auth state changes (token refresh, page reload)
   sb.auth.onAuthStateChange(async (event, session) => {
