@@ -14,10 +14,15 @@ const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 let currentUser = null; // { id, handle, display_name, email, avatar_color } when logged in
 
+let _cachedToken = null;
+
+sb.auth.onAuthStateChange((event, session) => {
+  _cachedToken = session?.access_token || null;
+});
+
 async function getAuthHeaders() {
-  const { data: { session } } = await sb.auth.getSession();
-  if (!session) return {};
-  return { 'Authorization': `Bearer ${session.access_token}` };
+  if (_cachedToken) return { 'Authorization': `Bearer ${_cachedToken}` };
+  return {};
 }
 
 async function apiGet(path) {
@@ -520,12 +525,23 @@ async function handleLogin() {
   const errorEl  = document.getElementById('login-error');
   errorEl.textContent = '';
   if (!email || !password) { errorEl.textContent = 'Email and password required.'; return; }
-  const { error } = await sb.auth.signInWithPassword({ email, password });
+  const { data, error } = await sb.auth.signInWithPassword({ email, password });
   if (error) { errorEl.textContent = error.message; return; }
+  // Session is in data.session — skip getSession entirely
+  if (data.session) {
+    try {
+      currentUser = await apiGet('/me');
+    } catch {
+      currentUser = null;
+      hideAuthModal();
+      showAuthModal('complete-profile');
+      return;
+    }
+  }
   hideAuthModal();
-  await initSession();
+  updateAuthUI();
+  await loadListsFromAPI();
 }
-
 async function handleSignup() {
   const email     = document.getElementById('signup-email').value.trim();
   const password  = document.getElementById('signup-password').value;
@@ -570,8 +586,14 @@ async function handleCompleteProfile() {
     return;
   }
 
-  hideAuthModal();
-  await initSession();
+hideAuthModal();
+  try {
+    currentUser = await apiGet('/me');
+  } catch {
+    currentUser = null;
+  }
+  updateAuthUI();
+  await loadListsFromAPI();
 }
 
 async function handleForgotPassword() {
@@ -594,23 +616,6 @@ async function handleLogout() {
   renderMyList();
 }
 
-async function initSession() {
-  const { data: { session } } = await sb.auth.getSession();
-  if (session) {
-    try {
-      currentUser = await apiGet('/me');
-    } catch {
-      // 404 = auth exists but no profile row yet — prompt to complete profile
-      currentUser = null;
-      showAuthModal('complete-profile');
-      return;
-    }
-  } else {
-    currentUser = null;
-  }
-  updateAuthUI();
-  await loadListsFromAPI();
-}
 
 function updateAuthUI() {
   const authArea = document.getElementById('auth-area');
@@ -739,20 +744,46 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('forgot-email').addEventListener('keydown', e => { if (e.key === 'Enter') handleForgotPassword(); });
   document.getElementById('complete-handle').addEventListener('keydown', e => { if (e.key === 'Enter') handleCompleteProfile(); });
 
-  // Auth state changes (token refresh, page reload)
+// Auth state changes (token refresh, page reload)
   sb.auth.onAuthStateChange(async (event, session) => {
+    _cachedToken = session?.access_token || null;
     if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
-      if (!currentUser) await initSession();
+      if (!currentUser) {
+        try {
+          currentUser = await apiGet('/me');
+        } catch {
+          currentUser = null;
+          showAuthModal('complete-profile');
+        }
+        updateAuthUI();
+        await loadListsFromAPI();
+      }
     }
     if (event === 'SIGNED_OUT') {
       currentUser = null;
       updateAuthUI();
+      lists = { books: [], films: [], albums: [], tv: [] };
+      renderMyList();
     }
   });
 
   renderDiscover('all');
   renderMatches();
-  initSession(); // calls loadListsFromAPI() → renderMyList() → updateProfileCounts()
+
+  // Initial session check — give onAuthStateChange a moment to fire
+  setTimeout(async () => {
+    if (_cachedToken && !currentUser) {
+      try {
+        currentUser = await apiGet('/me');
+      } catch {
+        currentUser = null;
+        showAuthModal('complete-profile');
+      }
+    }
+    updateAuthUI();
+    await loadListsFromAPI();
+  }, 500);
+  
 
   // ── Theme toggle ──────────────────────────────────────────────────────────
   const SUN_SVG  = `<svg width="14" height="14" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="3" fill="currentColor"/><path d="M8 1v2M8 13v2M1 8h2M13 8h2M3.05 3.05l1.41 1.41M11.54 11.54l1.41 1.41M3.05 12.95l1.41-1.41M11.54 4.46l1.41-1.41" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>`;

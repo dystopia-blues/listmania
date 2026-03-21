@@ -108,7 +108,7 @@ Currently: Books, Films, Albums, TV shows. Games was removed deliberately — ke
 
 ### Supabase
 - **Project URL:** `https://ekokbndwfwiygolwycia.supabase.co`
-- **Publishable key (safe in frontend):** `sb_publishable_hvdbnQLxqJWwA3GKRG3j_A_TqLYSsPw`
+- **Anon key (safe in frontend):** `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVrb2tibmR3ZndpeWdvbHd5Y2lhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQwNDA0OTMsImV4cCI6MjA4OTYxNjQ5M30.5eghZZvrKXYxLD4YtC4a_ltc8DSQYHzmByccmTy9sRo`
 - **JWT secret (server-side only):** stored in `~/marque-api/.env` as `SUPABASE_JWT_SECRET`
 - **Tables:** `users` (id, handle, display_name, auth_id, email, avatar_color), `lists` (user_id, category, position, title, meta, thumb, source, source_id, public)
 
@@ -118,7 +118,9 @@ Currently: Books, Films, Albums, TV shows. Games was removed deliberately — ke
 - **Session:** managed by Supabase JS client (tokens in localStorage, auto-refreshed)
 - **`currentUser`:** null when logged out; `{ id, handle, display_name, email, avatar_color }` when logged in
 - **API auth:** Bearer token injected via `getAuthHeaders()` into every `apiGet`/`apiPut` call
-- **Auth UI:** modal overlay with login / signup / forgot-password forms; `id="auth-area"` in sidebar renders login button or user badge + sign out
+- **Auth UI:** modal overlay with login / signup / forgot-password / complete-profile forms; `id="auth-area"` in sidebar renders login button or user badge + sign out
+- **Signup flow (two-step):** signup form collects email + password only → Supabase sends confirmation email → user clicks link → `onAuthStateChange` fires `SIGNED_IN` → `apiGet('/me')` returns 404 (no profile row yet) → complete-profile modal appears (no close button, must complete) → handle + display name collected → `POST /api/users` → session established. The complete-profile modal is also shown on login if a user somehow has a Supabase auth account but no `users` row.
+- **Token caching:** `_cachedToken` is kept in sync by `onAuthStateChange`; `getAuthHeaders()` reads it synchronously (avoids async `getSession()` on every request)
 
 ---
 

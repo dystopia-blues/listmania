@@ -3,6 +3,7 @@ const express = require('express');
 const cors = require('cors');
 const jwt = require('jsonwebtoken');
 const { createClient } = require('@supabase/supabase-js');
+const crypto = require('crypto');
 
 const app = express();
 app.use(cors());
@@ -15,6 +16,17 @@ const supabase = createClient(
 
 // ── Auth middleware ───────────────────────────────────────────────────────
 
+const SUPABASE_JWK = {
+  "x": "WqCI10o7EqQMyEzlpcupVol7M2ozhnBlVbTdtDEZWS0",
+  "y": "JVbvqBci-k7Ju1zRzUUy5l71975gnQoVhHdUZ_yLlVk",
+  "alg": "ES256",
+  "crv": "P-256",
+  "kty": "EC",
+  "key_ops": ["verify"]
+};
+
+const SUPABASE_PUBLIC_KEY = crypto.createPublicKey({ key: SUPABASE_JWK, format: 'jwk' });
+
 function authMiddleware(req, res, next) {
   const authHeader = req.headers.authorization;
   if (!authHeader?.startsWith('Bearer ')) {
@@ -23,10 +35,11 @@ function authMiddleware(req, res, next) {
   }
   try {
     const token = authHeader.split(' ')[1];
-    const decoded = jwt.verify(token, process.env.SUPABASE_JWT_SECRET);
+    const decoded = jwt.verify(token, SUPABASE_PUBLIC_KEY, { algorithms: ['ES256'] });
     req.user = decoded;
     next();
   } catch (err) {
+    console.error('JWT verify failed:', err.message);
     return res.status(401).json({ error: 'Invalid token' });
   }
 }
