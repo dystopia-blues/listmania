@@ -52,8 +52,38 @@
     <!-- MAIN -->
     <main class="main">
 
+      <!-- LANDING (shown to logged-out visitors) -->
+      <section class="view active" id="view-landing">
+        <div class="landing-hero">
+          <div class="landing-eyebrow">Art is subjective, but everyone's a critic...</div>
+          <h1 class="landing-title">Curate, rank and share<br>your top movies, books,<br>albums and shows.</h1>
+          <p class="landing-sub">Marque.ink is where you build definitive lists across books, films, albums and TV — then discover who shares your taste.</p>
+          <div class="landing-actions">
+            <button class="btn-lp-solid" id="landing-signup-btn">Get started</button>
+            <button class="btn-lp-ghost" id="landing-signin-btn">Sign in</button>
+          </div>
+        </div>
+        <div class="landing-features">
+          <div class="landing-feature">
+            <div class="lf-icon">📋</div>
+            <div class="lf-title">Your definitive lists</div>
+            <div class="lf-desc">Rank across every category. Drag to reorder. Change your mind. It's supposed to be hard.</div>
+          </div>
+          <div class="landing-feature">
+            <div class="lf-icon">🔍</div>
+            <div class="lf-title">Discover taste</div>
+            <div class="lf-desc">Browse what others are ranking. Filter by category. Find the people who loved the same obscure things you did.</div>
+          </div>
+          <div class="landing-feature">
+            <div class="lf-icon">⚡</div>
+            <div class="lf-title">Taste matching</div>
+            <div class="lf-desc">We score your compatibility across all categories — not just films, not just music, but the whole picture.</div>
+          </div>
+        </div>
+      </section>
+
       <!-- MY LISTS -->
-      <section class="view active" id="view-my-lists">
+      <section class="view" id="view-my-lists">
         <div class="view-header">
           <div>
             <h1>My lists</h1>
@@ -137,6 +167,7 @@
       <div id="mobile-auth" class="mobile-auth-bar"></div>
     </main>
   </div>
+  <script src="https://analytics.ahrefs.com/analytics.js" data-key="sPb/zymd7+9A+lCDikW6sg" async></script>
   <script src="app.js"></script>
 
   <!-- Auth Modal -->

@@ -302,3 +302,21 @@ h1 { font-size: 20px; font-weight: 600; letter-spacing: -0.3px; margin-bottom: 4
 .auth-links a:hover { color: var(--text); }
 .auth-error { font-size: 12px; color: #b91c1c; margin-bottom: 10px; min-height: 16px; }
 .auth-success { font-size: 12px; color: #166534; margin-bottom: 10px; min-height: 16px; }
+
+/* ── Landing view (logged-out visitors) ── */
+#view-landing { padding: 0; }
+#view-landing.active { display: flex; flex-direction: column; }
+.landing-hero { text-align: center; padding: 72px 24px 56px; max-width: 680px; margin: 0 auto; }
+.landing-eyebrow { font-size: 11px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text3); margin-bottom: 22px; }
+.landing-title { font-size: clamp(28px, 5vw, 50px); font-weight: 600; letter-spacing: -1.5px; line-height: 1.1; margin-bottom: 20px; }
+.landing-sub { font-size: clamp(14px, 2vw, 16px); color: var(--text2); line-height: 1.65; margin-bottom: 36px; }
+.landing-actions { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+.btn-lp-solid { font-size: 14px; font-weight: 500; color: var(--bg); background: var(--text); border: none; cursor: pointer; padding: 10px 24px; border-radius: 100px; transition: opacity 0.13s; }
+.btn-lp-solid:hover { opacity: 0.8; }
+.btn-lp-ghost { font-size: 14px; font-weight: 500; color: var(--text2); background: none; border: 0.5px solid var(--border2); cursor: pointer; padding: 10px 24px; border-radius: 100px; transition: all 0.13s; }
+.btn-lp-ghost:hover { color: var(--text); border-color: var(--text); }
+.landing-features { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1px; background: var(--border); border-top: 0.5px solid var(--border); margin-top: auto; }
+.landing-feature { background: var(--bg2); padding: 30px 26px; }
+.lf-icon { font-size: 22px; margin-bottom: 12px; }
+.lf-title { font-size: 14px; font-weight: 600; margin-bottom: 6px; letter-spacing: -0.2px; }
+.lf-desc { font-size: 13px; color: var(--text2); line-height: 1.55; }

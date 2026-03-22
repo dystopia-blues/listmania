@@ -683,6 +683,15 @@ function updateAuthUI() {
     if (!currentUser) searchInput.placeholder = 'Sign in to add items';
   }
 
+  // Show landing for logged-out users; switch to my-lists when they log in
+  const landingView = document.getElementById('view-landing');
+  const isOnLanding = landingView && landingView.classList.contains('active');
+  if (!currentUser) {
+    showView('landing');
+  } else if (isOnLanding) {
+    showView('my-lists');
+  }
+
   renderProfile();
 }
 
@@ -692,7 +701,8 @@ function showView(id) {
   document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
   document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
   document.getElementById('view-' + id).classList.add('active');
-  document.querySelector(`.nav-item[data-view="${id}"]`).classList.add('active');
+  const navItem = document.querySelector(`.nav-item[data-view="${id}"]`);
+  if (navItem) navItem.classList.add('active');
 }
 
 // ── Init ──────────────────────────────────────────────────────────────────
@@ -707,7 +717,14 @@ document.addEventListener('DOMContentLoaded', () => {
   document.addEventListener('click', e => { if (!document.getElementById('export-wrap').contains(e.target)) { exportMenu.classList.remove('open'); exportBtn.classList.remove('open'); } });
 
   // Nav
-  document.querySelectorAll('.nav-item').forEach(el => el.addEventListener('click', () => showView(el.dataset.view)));
+  document.querySelectorAll('.nav-item').forEach(el => el.addEventListener('click', () => {
+    if (el.dataset.view === 'my-lists' && !currentUser) { showAuthModal('login'); return; }
+    showView(el.dataset.view);
+  }));
+
+  // Landing page CTA buttons
+  document.getElementById('landing-signup-btn').addEventListener('click', () => showAuthModal('signup'));
+  document.getElementById('landing-signin-btn').addEventListener('click', () => showAuthModal('login'));
 
   // My Lists tabs
   document.getElementById('my-tabs').addEventListener('click', e => {
@@ -805,9 +822,9 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     if (event === 'SIGNED_OUT') {
       currentUser = null;
-      updateAuthUI();
       lists = { books: [], films: [], albums: [], tv: [] };
       renderMyList();
+      updateAuthUI();
     }
   });
 

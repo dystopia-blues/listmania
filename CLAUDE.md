@@ -13,14 +13,25 @@ Domain **marque.ink** is registered by Rob at Porkbun. Previous working name was
 ## File structure
 
 ```
-index.html   — app shell, all views, nav, sidebar, auth modal
+index.html   — app shell, all views (including landing view for logged-out users)
+landing.htm  — standalone marketing page (separate, links to /index.html)
 style.css    — all styles, CSS variables, dark mode, animations, mobile, auth styles
 app.js       — API client, auth, render functions, drag/drop, search, export
-landing.htm  — standalone splash/marketing page (inlines all CSS, same design tokens)
+.gitignore   — excludes api.md
 CLAUDE.md    — this file
 ```
 
+**Landing view in `index.html`:** `#view-landing` is a view section shown to logged-out visitors — same hero copy and feature cards as `landing.htm`. When a user logs in, `updateAuthUI()` automatically switches from `view-landing` to `view-my-lists`. On sign-out, it switches back. Nav clicks on "My lists" while logged out open the auth modal instead of switching view.
+
+**`api.md`** — local-only file (gitignored) containing API keys and secrets. Never commit this file. Contains:
+- Resend API key (for transactional email)
+
 Google Analytics tag (G-0Q4K1Z5866) is included in `<head>` via gtag.js.
+
+Ahrefs analytics is included in both `index.html` and `landing.htm`:
+```html
+<script src="https://analytics.ahrefs.com/analytics.js" data-key="sPb/zymd7+9A+lCDikW6sg" async></script>
+```
 
 Supabase JS client loaded via CDN in `<head>`:
 ```html
