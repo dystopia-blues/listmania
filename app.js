@@ -647,21 +647,34 @@ async function handleLogout() {
 
 
 function updateAuthUI() {
-  const authArea = document.getElementById('auth-area');
-  if (!authArea) return;
+  const authArea   = document.getElementById('auth-area');
+  const mobileAuth = document.getElementById('mobile-auth');
 
   if (currentUser) {
-    authArea.innerHTML = `
+    const sidebarHTML = `
       <div class="user-badge">
         <div class="user-avatar" style="${avatarStyle(currentUser.avatar_color || 'blue')}">${initials(currentUser.display_name)}</div>
         <span class="user-handle">@${currentUser.handle}</span>
       </div>
       <button class="logout-btn" id="logout-btn">Sign out</button>
     `;
-    document.getElementById('logout-btn').addEventListener('click', handleLogout);
+    if (authArea) {
+      authArea.innerHTML = sidebarHTML;
+      document.getElementById('logout-btn').addEventListener('click', handleLogout);
+    }
+    if (mobileAuth) {
+      mobileAuth.innerHTML = `<button class="logout-btn" id="logout-btn-mobile">Sign out</button>`;
+      document.getElementById('logout-btn-mobile').addEventListener('click', handleLogout);
+    }
   } else {
-    authArea.innerHTML = `<button class="login-btn" id="login-btn">Sign in</button>`;
-    document.getElementById('login-btn').addEventListener('click', () => showAuthModal('login'));
+    if (authArea) {
+      authArea.innerHTML = `<button class="login-btn" id="login-btn">Sign in</button>`;
+      document.getElementById('login-btn').addEventListener('click', () => showAuthModal('login'));
+    }
+    if (mobileAuth) {
+      mobileAuth.innerHTML = `<button class="login-btn" id="login-btn-mobile">Sign in</button>`;
+      document.getElementById('login-btn-mobile').addEventListener('click', () => showAuthModal('login'));
+    }
   }
 
   const searchInput = document.getElementById('search-input');

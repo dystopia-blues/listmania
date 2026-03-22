@@ -242,12 +242,7 @@ h1 { font-size: 20px; font-weight: 600; letter-spacing: -0.3px; margin-bottom: 4
   .nav-icon { width: 18px; height: 18px; opacity: 0.7; }
   .nav-item.active .nav-icon { opacity: 1; }
   .sidebar-footer { display: none; }
-  #auth-area { display: flex; position: fixed; bottom: 0; left: 0; right: 0; z-index: 40; background: var(--bg); border-top: 0.5px solid var(--border); padding: 12px 16px; justify-content: center; }
-  #auth-area .user-avatar { display: none; }
-  #auth-area .user-handle { display: none; }
-  #auth-area .user-badge { flex: unset; }
-  #auth-area .login-btn { max-width: 320px; }
-  .main { padding-bottom: 60px; }
+  .mobile-auth-bar { display: flex; justify-content: center; padding: 16px; border-top: 0.5px solid var(--border); margin-top: 8px; }
 
   .main { flex: 1; }
   .view { padding: 20px 16px; }
@@ -275,6 +270,9 @@ h1 { font-size: 20px; font-weight: 600; letter-spacing: -0.3px; margin-bottom: 4
   .tab { padding: 5px 10px; font-size: 11px; }
   .export-btn span { display: none; }
 }
+
+/* ── Mobile auth bar ── */
+.mobile-auth-bar { display: none; }
 
 /* ── Auth area (sidebar footer) ── */
 .login-btn { width: 100%; padding: 8px 14px; font-size: 13px; font-weight: 500; border: 0.5px solid var(--border2); border-radius: var(--radius-md); background: transparent; color: var(--text); cursor: pointer; transition: all 0.13s; text-align: center; }
