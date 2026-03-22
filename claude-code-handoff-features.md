@@ -4,7 +4,7 @@
 
 ## Context
 
-Auth is working, lists are API-backed, search populates source/source_id at add-time. This handoff covers five improvements. They're independent — tackle in any order, though items 2 and 3 are quick wins.
+Auth is working, lists are API-backed, search populates source/source_id at add-time. This handoff covers six improvements. They're independent — tackle in any order, though items 2 and 3 are quick wins.
 
 ---
 
@@ -271,6 +271,65 @@ sudo systemctl reload nginx
 
 ---
 
+## 6. Full-width landing hero for logged-out users
+
+**Where:** `index.html`, `style.css`, `app.js`
+
+**What:** When no user is logged in, hide the sidebar entirely and render the landing/hero section full-width. The sidebar nav links (My lists, Discover, Matches, Profile) are useless without an account — showing them to logged-out visitors is confusing.
+
+**Behavior:**
+
+- **Logged out:** Sidebar is hidden (`display: none`). The landing hero, feature cards, and CTAs span the full viewport width. No app chrome visible — it's a pure marketing/landing page.
+- **Logged in:** Sidebar appears as normal. Landing/hero section is hidden. App views are visible.
+
+**Implementation:**
+
+- Add a body-level class or data attribute to toggle layout mode, e.g. `<body data-auth="false">` or `<body class="logged-out">`
+- In CSS:
+  ```css
+  body.logged-out .sidebar { display: none; }
+  body.logged-out .main-content { margin-left: 0; }
+  body.logged-out .landing-hero { max-width: 100%; }
+  ```
+- In `app.js`, in `updateAuthUI()`:
+  - If `currentUser` is null: `document.body.classList.add('logged-out')`
+  - If `currentUser` exists: `document.body.classList.remove('logged-out')`
+- The landing section should already be hidden when logged in (Claude Code implemented this). Just make sure it goes full-width when the sidebar is gone.
+
+**The "Sign in" button** currently in the sidebar footer should move into the landing hero area for logged-out users (it's already there as one of the CTAs — "Get started" / "Sign in"). No need for a separate sidebar sign-in button when the sidebar is hidden.
+
+---
+
+## 6. Full-width landing hero for logged-out visitors
+
+**Where:** `index.html`, `style.css`, `app.js`
+
+**What:** When the user is not logged in, hide the sidebar entirely and render the landing/hero section full-width. The sidebar nav links (My lists, Discover, Matches, Profile) are meaningless without an account, and the sidebar eats space that the hero should use.
+
+**Behavior:**
+
+- **Logged out:** Sidebar is hidden (`display: none` or a class toggle). The landing hero, feature cards, and CTAs span the full viewport width. The "Sign in" button lives in the hero CTAs, not buried in the sidebar footer.
+- **Logged in:** Sidebar appears as normal. Landing/hero section is hidden. App views (My lists, Discover, etc.) render as they do now.
+
+**Implementation approach:**
+
+- Add a body-level class like `.logged-out` when `currentUser` is null
+- In `updateAuthUI()`, toggle this class:
+  ```js
+  document.body.classList.toggle('logged-out', !currentUser);
+  ```
+- In CSS:
+  ```css
+  .logged-out .sidebar { display: none; }
+  .logged-out .main { margin-left: 0; }
+  .logged-out .landing-hero { max-width: 100%; }
+  ```
+- The landing section should already be hidden when logged in (if not, add `.logged-out .landing { display: block }` / `.landing { display: none }`)
+
+**Mobile:** On mobile the sidebar is already collapsed to a top nav — same logic applies: hide the nav bar for logged-out users on the landing view.
+
+---
+
 ## Files modified
 
 | Feature | Files |
@@ -280,3 +339,5 @@ sudo systemctl reload nginx
 | 3. Prune search results | `app.js` |
 | 4. Admin page | New `admin.htm`, `~/marque-api/index.js` on droplet |
 | 5. Shareable links | New `profile.htm`, `app.js` (visibility toggle UI), Nginx config on droplet |
+| 6. Full-width landing | `index.html`, `style.css`, `app.js` |
+| 6. Full-width landing | `index.html`, `style.css`, `app.js` (`updateAuthUI`) |
