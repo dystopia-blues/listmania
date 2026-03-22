@@ -51,7 +51,7 @@ This is a **zero-dependency static site**. No build step, no npm, no frameworks.
 - **Web server:** Nginx (replaced Apache which was pre-installed on the droplet)
 - **SSL:** Let's Encrypt via Certbot, auto-configured for Nginx
 - **DNS:** Domain `marque.ink` registered at Porkbun, A record pointing to droplet IP
-- **Analytics:** Google Analytics 4 (G-0Q4K1Z5866)
+- **Analytics:** Google Analytics 4 (G-0Q4K1Z5866) + Ahrefs Analytics (key: `sPb/zymd7+9A+lCDikW6sg`)
 - **Static files:** served from `/var/www/html/` on the droplet (owned by `rob:rob`)
 - **SSH access:** User `rob` with sudo, root login disabled, password auth disabled
 - **Firewall (UFW):** ports 22 (SSH), 80 (HTTP), 443 (HTTPS) open
