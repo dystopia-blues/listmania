@@ -16,6 +16,7 @@ Domain **marque.ink** is registered by Rob at Porkbun. Previous working name was
 index.html   — app shell, all views, nav, sidebar, auth modal
 style.css    — all styles, CSS variables, dark mode, animations, mobile, auth styles
 app.js       — API client, auth, render functions, drag/drop, search, export
+landing.htm  — standalone splash/marketing page (inlines all CSS, same design tokens)
 CLAUDE.md    — this file
 ```
 
@@ -211,6 +212,36 @@ Lists are **private by default**. Users opt in per category. Anonymous users can
 
 ---
 
+## Data model
+
+### List item shape
+
+```js
+{ title, meta, thumb, source, source_id }
+```
+
+- **`meta`** — `"Author · Year"` (books/albums) or `"Year"` (films/tv)
+- **`thumb`** — URL hotlinked from source CDN, or `null`
+- **`source`** — canonical: `'tmdb'` | `'openlibrary'` | `'musicbrainz'` | `null`
+- **`source_id`** — ID string from that API, or `null`
+  - TMDB: numeric ID as string (e.g. `"238"`)
+  - Open Library: work key (e.g. `"/works/OL893415W"`)
+  - MusicBrainz: release-group UUID
+
+`source` and `source_id` are populated at add-time from `searchAPI()`. Items added before this was implemented have `null` for both.
+
+### App globals
+
+```js
+lists = { books: [], films: [], albums: [], tv: [] }  // current user's lists, loaded from API
+currentUser = null | { id, handle, display_name, email, avatar_color }
+currentCat = 'books' | 'films' | 'albums' | 'tv'     // active tab
+```
+
+`discoverData` and `matchData` are hardcoded in `app.js` — not yet API-backed.
+
+---
+
 ## Key rendering patterns
 
 ### renderMyList(animMap?)
@@ -234,8 +265,11 @@ JSON, YAML, or Markdown download of current category list.
 
 ### Variables
 ```css
---bg, --bg2, --bg3, --text, --text2, --text3, --border, --border2, --border3
---r: 8px, --rl: 12px, --sidebar-w: 210px
+--bg, --bg2, --bg3          /* background levels */
+--text, --text2, --text3    /* text levels */
+--border, --border2, --border3
+--radius-sm: 6px, --radius-md: 8px, --radius-lg: 12px
+--sidebar-w: 210px
 ```
 
 ### Mobile breakpoint: `@media (max-width: 640px)`
@@ -250,13 +284,14 @@ JSON, YAML, or Markdown download of current category list.
 - [ ] User onboarding flow for new blank-state users
 - [ ] Shareable profile URL — `/@handle` permanent links
 - [ ] Album cover art — needs key'd API
+- [x] Profile view — renders dynamically from `currentUser`; shows real lists/items counts (done)
 - [x] Auth modal — login, signup, forgot password, complete profile (done)
 - [x] Cover art hotlinks (done)
 - [x] Dark/light mode toggle (done)
 - [x] TMDB poster auto-heal (done)
 
 ### Data & search
-- [ ] Metadata enrichment (handoff exists: `claude-code-handoff-enrich.md`)
+- [x] `source` and `source_id` populated on add — search results now write canonical source + ID to the list item (done)
 - [ ] Move discoverData and matchData from hardcoded to API-backed
 - [ ] Custom categories (v2)
 
@@ -329,6 +364,6 @@ ssh rob@159.203.113.76 "pm2 restart marque-api"
 | File | Status | Description |
 |------|--------|-------------|
 | `claude-code-handoff.md` | Done | Wire frontend to API |
-| `claude-code-handoff-enrich.md` | Not started | Metadata enrichment script |
+| `claude-code-handoff-enrich.md` | Abandoned | Bulk enrichment scripts — data was wiped; source/source_id now populated live via search |
 | `claude-code-handoff-auth.md` | Phases 1-4,6 done; Phase 5 pending | User authentication |
 | `claude-code-handoff-signup-fix.md` | Done | Fix signup for email confirmation |

@@ -405,13 +405,42 @@ function renderMatches() {
   });
 }
 
-// ── Profile counts ────────────────────────────────────────────────────────
+// ── Profile ───────────────────────────────────────────────────────────────
+
+function renderProfile() {
+  const avatarEl = document.getElementById('profile-avatar');
+  const nameEl   = document.getElementById('profile-name');
+  const handleEl = document.getElementById('profile-handle');
+  if (!avatarEl) return;
+
+  if (currentUser) {
+    avatarEl.setAttribute('style', avatarStyle(currentUser.avatar_color || 'blue'));
+    avatarEl.textContent   = initials(currentUser.display_name);
+    nameEl.textContent     = currentUser.display_name;
+    handleEl.textContent   = `@${currentUser.handle}`;
+  } else {
+    avatarEl.removeAttribute('style');
+    avatarEl.textContent = '?';
+    nameEl.textContent   = 'Not signed in';
+    handleEl.textContent = '';
+  }
+
+  const cats       = ['books', 'films', 'albums', 'tv'];
+  const totalItems = cats.reduce((n, c) => n + (lists[c]?.length || 0), 0);
+  const activeLists = cats.filter(c => lists[c]?.length > 0).length;
+
+  const statLists = document.getElementById('stat-lists');
+  const statItems = document.getElementById('stat-items');
+  if (statLists) statLists.textContent = activeLists;
+  if (statItems) statItems.textContent = totalItems;
+}
 
 function updateProfileCounts() {
   ['books', 'films', 'albums', 'tv'].forEach(cat => {
     const el = document.getElementById('pc-' + cat);
     if (el) el.textContent = lists[cat].length + ' items';
   });
+  renderProfile();
 }
 
 // ── Export ────────────────────────────────────────────────────────────────
@@ -449,19 +478,19 @@ function exportList(fmt) {
 
 async function searchAPI(query, cat) {
   if (cat === 'books') {
-    const res  = await fetch(`https://openlibrary.org/search.json?q=${encodeURIComponent(query)}&limit=7&fields=title,author_name,first_publish_year,cover_i`);
+    const res  = await fetch(`https://openlibrary.org/search.json?q=${encodeURIComponent(query)}&limit=7&fields=key,title,author_name,first_publish_year,cover_i`);
     const data = await res.json();
-    return (data.docs || []).map(d => ({ title: d.title, meta: [d.author_name?.[0], d.first_publish_year].filter(Boolean).join(' · '), thumb: d.cover_i ? `https://covers.openlibrary.org/b/id/${d.cover_i}-S.jpg` : null, source: 'Open Library' }));
+    return (data.docs || []).map(d => ({ title: d.title, meta: [d.author_name?.[0], d.first_publish_year].filter(Boolean).join(' · '), thumb: d.cover_i ? `https://covers.openlibrary.org/b/id/${d.cover_i}-S.jpg` : null, source: 'openlibrary', source_id: d.key || null, sourceLabel: 'Open Library' }));
   }
   if (cat === 'films' || cat === 'tv') {
     const res  = await fetch(`https://api.themoviedb.org/3/search/${cat === 'films' ? 'movie' : 'tv'}?api_key=2dca580c2a14b55200e784d157207b4d&query=${encodeURIComponent(query)}&page=1`);
     const data = await res.json();
-    return (data.results || []).slice(0, 7).map(d => ({ title: d.title || d.name, meta: (d.release_date || d.first_air_date || '').slice(0, 4), thumb: d.poster_path ? `https://image.tmdb.org/t/p/w92${d.poster_path}` : null, source: 'TMDB' }));
+    return (data.results || []).slice(0, 7).map(d => ({ title: d.title || d.name, meta: (d.release_date || d.first_air_date || '').slice(0, 4), thumb: d.poster_path ? `https://image.tmdb.org/t/p/w92${d.poster_path}` : null, source: 'tmdb', source_id: String(d.id), sourceLabel: 'TMDB' }));
   }
   if (cat === 'albums') {
     const res  = await fetch(`https://musicbrainz.org/ws/2/release-group/?query=${encodeURIComponent(query)}&type=album&fmt=json&limit=7`, { headers: { 'User-Agent': 'Marque.ink/1.0' } });
     const data = await res.json();
-    return (data['release-groups'] || []).slice(0, 7).map(d => ({ title: d.title, meta: [d['artist-credit']?.[0]?.name, (d['first-release-date'] || '').slice(0, 4)].filter(Boolean).join(' · '), thumb: null, source: 'MusicBrainz' }));
+    return (data['release-groups'] || []).slice(0, 7).map(d => ({ title: d.title, meta: [d['artist-credit']?.[0]?.name, (d['first-release-date'] || '').slice(0, 4)].filter(Boolean).join(' · '), thumb: null, source: 'musicbrainz', source_id: d.id || null, sourceLabel: 'MusicBrainz' }));
   }
   return [];
 }
@@ -476,7 +505,7 @@ function renderDropdown(results) {
       <div style="min-width:0;flex:1">
         <div class="ac-title">${escHtml(r.title)}</div>
         ${r.meta ? `<div class="ac-meta">${escHtml(r.meta)}</div>` : ''}
-        <div class="ac-source">${r.source}</div>
+        <div class="ac-source">${r.sourceLabel}</div>
       </div>
     </div>`).join('');
   ac.querySelectorAll('.ac-item').forEach(el => el.addEventListener('mousedown', e => { e.preventDefault(); selectResult(+el.dataset.idx); }));
@@ -493,7 +522,7 @@ function setFocus(items) {
 function selectResult(idx) {
   const r = searchResults[idx];
   if (!r || lists[currentCat].length >= 50) return;
-  lists[currentCat].push({ title: r.title, meta: r.meta || '—', thumb: r.thumb || null });
+  lists[currentCat].push({ title: r.title, meta: r.meta || '—', thumb: r.thumb || null, source: r.source || null, source_id: r.source_id || null });
   document.getElementById('search-input').value = '';
   searchResults = [];
   closeDropdown();
@@ -640,6 +669,8 @@ function updateAuthUI() {
     searchInput.disabled = !currentUser || lists[currentCat].length >= 50;
     if (!currentUser) searchInput.placeholder = 'Sign in to add items';
   }
+
+  renderProfile();
 }
 
 // ── Nav & Tabs ────────────────────────────────────────────────────────────
