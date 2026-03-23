@@ -3,6 +3,7 @@
 const EMOJIS = { books: '📚', films: '🎬', albums: '🎵', tv: '📺' };
 
 let lists = { books: [], films: [], albums: [], tv: [] };
+let listVisibility = { books: false, films: false, albums: false, tv: false };
 
 // ── API ───────────────────────────────────────────────────────────────────
 
@@ -32,6 +33,17 @@ async function apiGet(path) {
   return res.json();
 }
 
+async function apiPatch(path, body) {
+  const headers = await getAuthHeaders();
+  const res = await fetch(`${API_BASE}${path}`, {
+    method:  'PATCH',
+    headers: { 'Content-Type': 'application/json', ...headers },
+    body:    JSON.stringify(body),
+  });
+  if (!res.ok) throw new Error(`API error: ${res.status}`);
+  return res.json();
+}
+
 async function apiPut(path, body) {
   const headers = await getAuthHeaders();
   const res = await fetch(`${API_BASE}${path}`, {
@@ -55,6 +67,9 @@ async function loadListsFromAPI() {
     lists.films  = data.films  || [];
     lists.albums = data.albums || [];
     lists.tv     = data.tv     || [];
+    ['books', 'films', 'albums', 'tv'].forEach(cat => {
+      listVisibility[cat] = data[cat]?.[0]?.public || false;
+    });
   } catch (err) {
     console.error('Failed to load lists from API:', err);
     const saved = localStorage.getItem('lists');
@@ -170,6 +185,42 @@ function escHtml(str) {
 
 // ── Render: My List ───────────────────────────────────────────────────────
 
+function renderVisibilityBar() {
+  const bar = document.getElementById('visibility-bar');
+  if (!bar) return;
+  if (!currentUser) { bar.innerHTML = ''; return; }
+  const cat = currentCat;
+  const isPublic = listVisibility[cat];
+  const shareUrl = `https://marque.ink/@${currentUser.handle}/${cat}`;
+  bar.innerHTML = `
+    <label class="vis-label">
+      <input type="checkbox" id="vis-check" ${isPublic ? 'checked' : ''}>
+      <span class="vis-toggle"></span>
+      <span class="vis-text">${isPublic ? 'Public' : 'Private'}</span>
+    </label>
+    ${isPublic ? `<span class="vis-url">${shareUrl}</span><button class="vis-copy" id="vis-copy">Copy link</button>` : ''}
+  `;
+  document.getElementById('vis-check').addEventListener('change', e => toggleVisibility(cat, e.target.checked));
+  if (isPublic) {
+    document.getElementById('vis-copy').addEventListener('click', () => {
+      navigator.clipboard.writeText(shareUrl);
+      const btn = document.getElementById('vis-copy');
+      btn.textContent = 'Copied!';
+      setTimeout(() => { if (btn.isConnected) btn.textContent = 'Copy link'; }, 1500);
+    });
+  }
+}
+
+async function toggleVisibility(cat, makePublic) {
+  try {
+    await apiPatch(`/lists/${currentUser.handle}/${cat}/visibility`, { public: makePublic });
+    listVisibility[cat] = makePublic;
+    renderVisibilityBar();
+  } catch (err) {
+    console.error('Failed to toggle visibility:', err);
+  }
+}
+
 function renderMyList(animMap) {
   const items = lists[currentCat];
   document.getElementById('list-label').textContent = `Top 50 ${currentCat}`;
@@ -249,6 +300,7 @@ function renderMyList(animMap) {
   document.getElementById('limit-note').style.display = full ? 'block' : 'none';
 
   updateProfileCounts();
+  renderVisibilityBar();
 }
 
 // ── Drag-and-drop (pointer events — no HTML5 drag API) ────────────────────
@@ -522,6 +574,17 @@ function setFocus(items) {
 function selectResult(idx) {
   const r = searchResults[idx];
   if (!r || lists[currentCat].length >= 50) return;
+
+  if (r.source_id && lists[currentCat].some(item => item.source_id === r.source_id && item.source === r.source)) {
+    document.getElementById('search-input').value = '';
+    closeDropdown();
+    const ac = document.getElementById('autocomplete');
+    ac.innerHTML = `<div class="ac-empty">Already on your list</div>`;
+    ac.classList.add('open');
+    setTimeout(closeDropdown, 1500);
+    return;
+  }
+
   lists[currentCat].push({ title: r.title, meta: r.meta || '—', thumb: r.thumb || null, source: r.source || null, source_id: r.source_id || null });
   document.getElementById('search-input').value = '';
   searchResults = [];
@@ -683,6 +746,8 @@ function updateAuthUI() {
     if (!currentUser) searchInput.placeholder = 'Sign in to add items';
   }
 
+  document.body.classList.toggle('logged-out', !currentUser);
+
   // Show landing for logged-out users; switch to my-lists when they log in
   const landingView = document.getElementById('view-landing');
   const isOnLanding = landingView && landingView.classList.contains('active');
@@ -758,6 +823,10 @@ document.addEventListener('DOMContentLoaded', () => {
       document.getElementById('spinner').classList.add('visible');
       try {
         searchResults = await searchAPI(val, currentCat);
+        const existingIds = new Set(
+          lists[currentCat].filter(i => i.source_id).map(i => `${i.source}:${i.source_id}`)
+        );
+        searchResults = searchResults.filter(r => !r.source_id || !existingIds.has(`${r.source}:${r.source_id}`));
         renderDropdown(searchResults);
       } catch {
         searchResults = [];

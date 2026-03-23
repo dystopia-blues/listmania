@@ -260,6 +260,68 @@ app.patch('/api/lists/:handle/:category/visibility', async (req, res) => {
   res.json({ ok: true });
 });
 
+// GET /api/admin/users — returns all users with list counts
+// Requires auth + admin check
+app.get('/api/admin/users', async (req, res) => {
+  const authUser = await getAuthUser(req);
+  if (!authUser || authUser.handle !== 'rob') {
+    return res.status(403).json({ error: 'Forbidden' });
+  }
+
+  const { data: users, error } = await supabase
+    .from('users')
+    .select('id, handle, display_name, email, avatar_color, created_at')
+    .order('created_at', { ascending: false });
+
+  if (error) return res.status(500).json({ error: error.message });
+
+  // Get list counts per user
+  for (const user of users) {
+    const { data: lists } = await supabase
+      .from('lists')
+      .select('category')
+      .eq('user_id', user.id);
+
+    user.list_counts = { books: 0, films: 0, albums: 0, tv: 0 };
+    (lists || []).forEach(l => { user.list_counts[l.category]++; });
+  }
+
+  res.json(users);
+});
+
+// GET /api/admin/lists/:handle — returns ALL lists for a user (ignores public/private)
+app.get('/api/admin/lists/:handle', async (req, res) => {
+  const authUser = await getAuthUser(req);
+  if (!authUser || authUser.handle !== 'rob') {
+    return res.status(403).json({ error: 'Forbidden' });
+  }
+
+  const { data: user } = await supabase
+    .from('users')
+    .select('id')
+    .eq('handle', req.params.handle)
+    .single();
+
+  if (!user) return res.status(404).json({ error: 'User not found' });
+
+  const { data: lists, error } = await supabase
+    .from('lists')
+    .select('category, position, title, meta, thumb, source, source_id, public')
+    .eq('user_id', user.id)
+    .order('category')
+    .order('position');
+
+  if (error) return res.status(500).json({ error: error.message });
+
+  const grouped = {};
+  lists.forEach(item => {
+    if (!grouped[item.category]) grouped[item.category] = [];
+    grouped[item.category].push(item);
+  });
+
+  res.json(grouped);
+});
+
 // ── Start ────────────────────────────────────────────────────────────────
 
 app.listen(process.env.PORT, () => {

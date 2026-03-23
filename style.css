@@ -320,3 +320,22 @@ h1 { font-size: 20px; font-weight: 600; letter-spacing: -0.3px; margin-bottom: 4
 .lf-icon { font-size: 22px; margin-bottom: 12px; }
 .lf-title { font-size: 14px; font-weight: 600; margin-bottom: 6px; letter-spacing: -0.2px; }
 .lf-desc { font-size: 13px; color: var(--text2); line-height: 1.55; }
+
+/* ── Visibility bar (per-category public toggle) ── */
+.visibility-bar { display: flex; align-items: center; gap: 12px; padding: 10px 0; margin-bottom: 12px; border-top: 0.5px solid var(--border); border-bottom: 0.5px solid var(--border); min-height: 40px; }
+.vis-label { display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 12px; color: var(--text2); user-select: none; }
+.vis-label input[type="checkbox"] { display: none; }
+.vis-toggle { width: 32px; height: 18px; background: var(--border2); border-radius: 100px; position: relative; flex-shrink: 0; transition: background 0.2s; }
+.vis-toggle::after { content: ''; position: absolute; top: 3px; left: 3px; width: 12px; height: 12px; border-radius: 50%; background: var(--bg); transition: transform 0.2s; }
+.vis-label input:checked ~ .vis-toggle { background: var(--text); }
+.vis-label input:checked ~ .vis-toggle::after { transform: translateX(14px); }
+.vis-text { font-weight: 500; }
+.vis-url { font-size: 11px; color: var(--text3); font-family: monospace; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1; min-width: 0; }
+.vis-copy { font-size: 11px; font-weight: 500; padding: 4px 10px; border-radius: 100px; border: 0.5px solid var(--border2); background: transparent; color: var(--text2); cursor: pointer; white-space: nowrap; transition: all 0.13s; flex-shrink: 0; }
+.vis-copy:hover { color: var(--text); border-color: var(--text); }
+
+/* ── Logged-out layout (full-width landing, no sidebar) ── */
+.logged-out .sidebar { display: none !important; }
+.logged-out .app { max-width: 100%; border-left: none; border-right: none; }
+.logged-out .landing-hero { max-width: 800px; padding-top: 100px; padding-bottom: 80px; }
+.logged-out .mobile-auth-bar { display: none; }

@@ -15,6 +15,8 @@ Domain **marque.ink** is registered by Rob at Porkbun. Previous working name was
 ```
 index.html   — app shell, all views (including landing view for logged-out users)
 landing.htm  — standalone marketing page (separate, links to /index.html)
+profile.htm  — read-only public profile page (accessed via /@handle/category Nginx rewrite)
+admin.htm    — admin dashboard (Rob only, not linked from main site)
 style.css    — all styles, CSS variables, dark mode, animations, mobile, auth styles
 app.js       — API client, auth, render functions, drag/drop, search, export
 .gitignore   — excludes api.md
@@ -291,10 +293,14 @@ JSON, YAML, or Markdown download of current category list.
 
 ### UI / UX
 - [ ] Account panel — change display name, handle, avatar color, password (Phase 5 of auth handoff)
-- [ ] Per-category public/private toggle UI
 - [ ] User onboarding flow for new blank-state users
-- [ ] Shareable profile URL — `/@handle` permanent links
 - [ ] Album cover art — needs key'd API
+- [x] Per-category public/private toggle — checkbox in My Lists view; calls `PATCH /api/lists/:handle/:category/visibility`; shows shareable URL + copy button (done)
+- [x] Duplicate prevention — `selectResult()` blocks adding same `source_id` twice; search dropdown filters already-added items (done)
+- [x] Full-width landing for logged-out users — sidebar hidden, `.logged-out` body class toggled by `updateAuthUI()` (done)
+- [x] Shareable profile pages — `profile.htm` serves `/@handle/cat` URLs via Nginx rewrite; parses both path and query params; fetches display name/avatar from Supabase `users` table directly (done)
+- [x] Admin dashboard — `admin.htm` at `/admin.htm`; admin API endpoints live on Express (done)
+- [x] Branded auth emails — confirmation and password reset templates customised in Supabase dashboard (done)
 - [x] Profile view — renders dynamically from `currentUser`; shows real lists/items counts (done)
 - [x] Auth modal — login, signup, forgot password, complete profile (done)
 - [x] Cover art hotlinks (done)
@@ -310,6 +316,8 @@ JSON, YAML, or Markdown download of current category list.
 - [x] Hosting — DO droplet, Nginx, SSL (done)
 - [x] Backend API — Express + Supabase Postgres (done)
 - [x] User authentication (done)
+- [x] Nginx rewrite rule for `/@handle/cat` → `profile.htm?u=handle&cat=cat` (done — added to `/etc/nginx/sites-available/listmania`)
+- [x] Admin API endpoints (`/api/admin/users`, `/api/admin/lists/:handle`) — live on droplet (done)
 - [ ] Fix `getSession()` hang — investigate npm build or newer Supabase JS version
 - [ ] Set up `www.marque.ink` DNS + cert
 - [ ] Proxy TMDB API key through backend
@@ -340,6 +348,8 @@ JSON, YAML, or Markdown download of current category list.
 | `data-theme` on `<html>` | Overrides media query; inline script prevents FOUC |
 | `healThumb()` on onerror | Auto-fixes stale poster paths |
 | animMap into renderMyList | Cleaner than post-render DOM queries |
+| `profile.htm` queries Supabase directly for user info | No unauthenticated `/api/users/:handle` endpoint exists; RLS allows public read of `users` table so anon key works |
+| `profile.htm` parses `location.pathname` for handle/cat | Nginx internal rewrite keeps browser URL as `/@handle/cat`, so query params are empty; must read from path |
 
 ---
 
@@ -359,7 +369,7 @@ The gap: no cross-category taste graph exists.
 
 Frontend:
 ```bash
-scp index.html style.css app.js rob@159.203.113.76:/var/www/html/
+scp index.html landing.htm profile.htm admin.htm style.css app.js rob@159.203.113.76:/var/www/html/
 ```
 
 API:

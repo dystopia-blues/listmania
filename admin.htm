@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Marque Admin</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.47.12/dist/umd/supabase.min.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #ffffff; --bg2: #f7f6f3; --bg3: #f0efe9;
+      --text: #1a1a18; --text2: #6b6a65; --text3: #a09f9a;
+      --border: rgba(0,0,0,0.1); --border2: rgba(0,0,0,0.18);
+      --radius-sm: 6px; --radius-md: 8px; --radius-lg: 12px;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #141413; --bg2: #1e1d1b; --bg3: #252421;
+        --text: #e8e6df; --text2: #9a9890; --text3: #5e5d58;
+        --border: rgba(255,255,255,0.08); --border2: rgba(255,255,255,0.14);
+      }
+    }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; font-size: 14px; color: var(--text); background: var(--bg3); -webkit-font-smoothing: antialiased; min-height: 100vh; }
+    .header { background: var(--bg); border-bottom: 0.5px solid var(--border); padding: 16px 32px; display: flex; align-items: center; gap: 16px; }
+    .logo { font-size: 16px; font-weight: 600; letter-spacing: -0.4px; }
+    .logo-muted { opacity: 0.35; font-weight: 400; }
+    .badge { font-size: 10px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text3); background: var(--bg2); border: 0.5px solid var(--border2); padding: 3px 8px; border-radius: 100px; }
+    .container { max-width: 1000px; margin: 0 auto; padding: 32px 24px; }
+    .status { padding: 48px; text-align: center; color: var(--text2); }
+    .stats-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 1px; background: var(--border); border: 0.5px solid var(--border); border-radius: var(--radius-md); overflow: hidden; margin-bottom: 32px; }
+    .stat-card { background: var(--bg); padding: 20px 24px; }
+    .stat-n { font-size: 28px; font-weight: 600; letter-spacing: -1px; }
+    .stat-l { font-size: 11px; color: var(--text3); text-transform: uppercase; letter-spacing: 0.07em; margin-top: 4px; }
+    .section-title { font-size: 11px; font-weight: 600; color: var(--text3); text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 12px; }
+    table { width: 100%; border-collapse: collapse; background: var(--bg); border: 0.5px solid var(--border); border-radius: var(--radius-md); overflow: hidden; }
+    th { text-align: left; font-size: 11px; font-weight: 600; color: var(--text3); text-transform: uppercase; letter-spacing: 0.07em; padding: 12px 16px; border-bottom: 0.5px solid var(--border); }
+    td { padding: 12px 16px; border-bottom: 0.5px solid var(--border); font-size: 13px; vertical-align: top; }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: var(--bg2); }
+    .handle { color: var(--text2); font-size: 12px; }
+    .count-cell { font-variant-numeric: tabular-nums; }
+    .expand-btn { font-size: 11px; font-weight: 500; padding: 4px 10px; border: 0.5px solid var(--border2); border-radius: 100px; background: transparent; color: var(--text2); cursor: pointer; white-space: nowrap; }
+    .expand-btn:hover { color: var(--text); border-color: var(--text); }
+    .lists-row td { background: var(--bg2); padding: 16px; }
+    .lists-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; }
+    .list-col h4 { font-size: 11px; font-weight: 600; color: var(--text3); text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 8px; }
+    .list-col ol { padding-left: 18px; }
+    .list-col li { font-size: 12px; color: var(--text2); line-height: 1.6; }
+    .priv-tag { font-size: 10px; color: var(--text3); margin-left: 4px; }
+    .error { color: #b91c1c; font-size: 13px; }
+  </style>
+</head>
+<body>
+
+  <div class="header">
+    <div class="logo">Marque<span class="logo-muted">.ink</span></div>
+    <div class="badge">Admin</div>
+  </div>
+
+  <div class="container">
+    <div class="status" id="status">Checking auth...</div>
+    <div id="content" style="display:none">
+      <div class="stats-row" id="stats-row"></div>
+      <div class="section-title">Users</div>
+      <table id="user-table">
+        <thead>
+          <tr>
+            <th>User</th>
+            <th>Email</th>
+            <th>Joined</th>
+            <th>Books</th>
+            <th>Films</th>
+            <th>Albums</th>
+            <th>TV</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="user-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <script>
+    const API_BASE    = 'https://marque.ink/api';
+    const SUPABASE_URL = 'https://ekokbndwfwiygolwycia.supabase.co';
+    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVrb2tibmR3ZndpeWdvbHd5Y2lhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQwNDA0OTMsImV4cCI6MjA4OTYxNjQ5M30.5eghZZvrKXYxLD4YtC4a_ltc8DSQYHzmByccmTy9sRo';
+
+    const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    let _token = null;
+
+    sb.auth.onAuthStateChange((event, session) => {
+      _token = session?.access_token || null;
+    });
+
+    async function apiFetch(path, options = {}) {
+      const res = await fetch(`${API_BASE}${path}`, {
+        ...options,
+        headers: { 'Authorization': `Bearer ${_token}`, ...(options.headers || {}) },
+      });
+      if (!res.ok) throw new Error(`${res.status}`);
+      return res.json();
+    }
+
+    function setStatus(msg, isError = false) {
+      const el = document.getElementById('status');
+      el.textContent = msg;
+      el.className = isError ? 'status error' : 'status';
+      el.style.display = '';
+      document.getElementById('content').style.display = 'none';
+    }
+
+    function formatDate(iso) {
+      return new Date(iso).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+    }
+
+    async function loadLists(handle, row) {
+      const btn = row.querySelector('.expand-btn');
+      const existing = document.getElementById(`lists-${handle}`);
+      if (existing) { existing.remove(); btn.textContent = 'View lists'; return; }
+
+      btn.textContent = 'Loading...';
+      btn.disabled = true;
+      try {
+        const data = await apiFetch(`/admin/lists/${handle}`);
+        const cats = ['books', 'films', 'albums', 'tv'];
+        const labels = { books: 'Books', films: 'Films', albums: 'Albums', tv: 'TV' };
+        const cols = cats.map(cat => {
+          const items = data[cat] || [];
+          if (!items.length) return `<div class="list-col"><h4>${labels[cat]}</h4><p style="font-size:12px;color:var(--text3)">Empty</p></div>`;
+          return `<div class="list-col">
+            <h4>${labels[cat]} ${!items[0]?.public ? '<span class="priv-tag">private</span>' : ''}</h4>
+            <ol>${items.slice(0, 10).map(i => `<li>${i.title}</li>`).join('')}${items.length > 10 ? `<li style="color:var(--text3)">+${items.length - 10} more</li>` : ''}</ol>
+          </div>`;
+        });
+        const listsRow = document.createElement('tr');
+        listsRow.id = `lists-${handle}`;
+        listsRow.className = 'lists-row';
+        listsRow.innerHTML = `<td colspan="8"><div class="lists-grid">${cols.join('')}</div></td>`;
+        row.insertAdjacentElement('afterend', listsRow);
+        btn.textContent = 'Hide lists';
+      } catch (e) {
+        btn.textContent = 'View lists';
+      }
+      btn.disabled = false;
+    }
+
+    async function init() {
+      setTimeout(async () => {
+        if (!_token) { setStatus('Not signed in. Please sign in at marque.ink first, then return here.', true); return; }
+
+        let me;
+        try {
+          me = await apiFetch('/me');
+        } catch {
+          setStatus('Could not verify identity.', true);
+          return;
+        }
+
+        if (me.handle !== 'rob') {
+          setStatus('Access denied.', true);
+          return;
+        }
+
+        let users;
+        try {
+          users = await apiFetch('/admin/users');
+        } catch (e) {
+          setStatus(`Failed to load users: ${e.message}`, true);
+          return;
+        }
+
+        // Stats
+        const totalItems = users.reduce((n, u) => n + Object.values(u.list_counts).reduce((a, b) => a + b, 0), 0);
+        const catTotals = { books: 0, films: 0, albums: 0, tv: 0 };
+        users.forEach(u => Object.entries(u.list_counts).forEach(([c, n]) => { catTotals[c] += n; }));
+        document.getElementById('stats-row').innerHTML = [
+          { n: users.length, l: 'Users' },
+          { n: totalItems, l: 'Total items' },
+          { n: catTotals.books, l: 'Books' },
+          { n: catTotals.films, l: 'Films' },
+          { n: catTotals.albums, l: 'Albums' },
+          { n: catTotals.tv, l: 'TV' },
+        ].map(s => `<div class="stat-card"><div class="stat-n">${s.n}</div><div class="stat-l">${s.l}</div></div>`).join('');
+
+        // User rows
+        const tbody = document.getElementById('user-tbody');
+        tbody.innerHTML = users.map(u => `
+          <tr id="user-${u.handle}">
+            <td><strong>${u.display_name}</strong><br><span class="handle">@${u.handle}</span></td>
+            <td>${u.email || '—'}</td>
+            <td>${formatDate(u.created_at)}</td>
+            <td class="count-cell">${u.list_counts.books}</td>
+            <td class="count-cell">${u.list_counts.films}</td>
+            <td class="count-cell">${u.list_counts.albums}</td>
+            <td class="count-cell">${u.list_counts.tv}</td>
+            <td><button class="expand-btn" onclick="loadLists('${u.handle}', document.getElementById('user-${u.handle}'))">View lists</button></td>
+          </tr>
+        `).join('');
+
+        document.getElementById('status').style.display = 'none';
+        document.getElementById('content').style.display = '';
+      }, 500);
+    }
+
+    init();
+  </script>
+</body>
+</html>

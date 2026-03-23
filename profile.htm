@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Marque</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.47.12/dist/umd/supabase.min.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #ffffff; --bg2: #f7f6f3; --bg3: #f0efe9;
+      --text: #1a1a18; --text2: #6b6a65; --text3: #a09f9a;
+      --border: rgba(0,0,0,0.1); --border2: rgba(0,0,0,0.18);
+      --radius-sm: 6px; --radius-md: 8px; --radius-lg: 12px;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #141413; --bg2: #1e1d1b; --bg3: #252421;
+        --text: #e8e6df; --text2: #9a9890; --text3: #5e5d58;
+        --border: rgba(255,255,255,0.08); --border2: rgba(255,255,255,0.14);
+      }
+    }
+    html, body { min-height: 100%; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; font-size: 14px; color: var(--text); background: var(--bg3); -webkit-font-smoothing: antialiased; }
+
+    /* ── Nav ── */
+    .top-nav { display: flex; align-items: center; justify-content: space-between; padding: 16px 32px; background: var(--bg); border-bottom: 0.5px solid var(--border); }
+    .logo { font-size: 16px; font-weight: 600; letter-spacing: -0.4px; color: var(--text); text-decoration: none; }
+    .logo-muted { opacity: 0.35; font-weight: 400; }
+    .join-btn { font-size: 13px; font-weight: 500; color: var(--bg); background: var(--text); text-decoration: none; padding: 7px 16px; border-radius: 100px; transition: opacity 0.13s; }
+    .join-btn:hover { opacity: 0.8; }
+
+    /* ── Content ── */
+    .content { max-width: 640px; margin: 0 auto; padding: 48px 24px 80px; }
+
+    /* ── Profile header ── */
+    .profile-head { display: flex; align-items: center; gap: 16px; margin-bottom: 32px; }
+    .avatar { width: 52px; height: 52px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: 600; flex-shrink: 0; }
+    .avatar-blue  { background: #dbeafe; color: #1e40af; }
+    .avatar-green { background: #dcfce7; color: #166534; }
+    .avatar-amber { background: #fef3c7; color: #92400e; }
+    .avatar-red   { background: #fee2e2; color: #991b1b; }
+    .profile-name { font-size: 20px; font-weight: 600; letter-spacing: -0.3px; }
+    .profile-handle { font-size: 13px; color: var(--text3); margin-top: 2px; }
+
+    /* ── Tabs ── */
+    .tabs { display: flex; gap: 6px; margin-bottom: 24px; flex-wrap: wrap; }
+    .tab { padding: 6px 14px; border-radius: 100px; font-size: 12px; font-weight: 500; border: 0.5px solid var(--border2); cursor: pointer; background: transparent; color: var(--text2); transition: all 0.13s; text-decoration: none; }
+    .tab:hover { color: var(--text); border-color: var(--text); }
+    .tab.active { background: var(--text); color: var(--bg); border-color: var(--text); }
+
+    /* ── List ── */
+    .section-label { font-size: 11px; font-weight: 600; color: var(--text3); text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 14px; }
+    .list-item { display: flex; align-items: center; gap: 12px; padding: 10px 0; border-bottom: 0.5px solid var(--border); }
+    .list-item:last-child { border-bottom: none; }
+    .rank { font-size: 12px; color: var(--text3); font-variant-numeric: tabular-nums; width: 22px; flex-shrink: 0; text-align: right; }
+    .thumb { width: 40px; height: 60px; border-radius: 4px; background: var(--bg2); object-fit: cover; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 24px; overflow: hidden; }
+    .thumb img { width: 100%; height: 100%; object-fit: cover; }
+    .item-title { font-size: 14px; font-weight: 500; }
+    .item-meta { font-size: 12px; color: var(--text2); margin-top: 2px; }
+
+    /* ── Empty / status states ── */
+    .empty { text-align: center; padding: 48px 0; color: var(--text3); font-size: 14px; }
+
+    /* ── CTA footer ── */
+    .cta-footer { margin-top: 48px; padding: 32px; background: var(--bg); border: 0.5px solid var(--border); border-radius: var(--radius-lg); text-align: center; }
+    .cta-footer h3 { font-size: 16px; font-weight: 600; letter-spacing: -0.3px; margin-bottom: 6px; }
+    .cta-footer p { font-size: 13px; color: var(--text2); margin-bottom: 20px; }
+    .cta-footer a { display: inline-block; font-size: 13px; font-weight: 500; color: var(--bg); background: var(--text); text-decoration: none; padding: 9px 20px; border-radius: 100px; transition: opacity 0.13s; }
+    .cta-footer a:hover { opacity: 0.8; }
+
+    @media (max-width: 600px) {
+      .top-nav { padding: 14px 18px; }
+      .content { padding: 32px 16px 60px; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="top-nav">
+    <a class="logo" href="/">Marque<span class="logo-muted">.ink</span></a>
+    <a class="join-btn" href="/">Join Marque.ink</a>
+  </div>
+
+  <div class="content">
+    <div id="profile-head" class="profile-head" style="display:none"></div>
+    <div id="tabs" class="tabs" style="display:none"></div>
+    <div id="list-label" class="section-label" style="display:none"></div>
+    <div id="list-items"></div>
+    <div class="cta-footer" id="cta-footer" style="display:none">
+      <h3>Curate your own lists</h3>
+      <p>Rank your top 50 films, books, albums and TV shows — then find people who share your taste.</p>
+      <a href="/">Get started free</a>
+    </div>
+  </div>
+
+  <script>
+    const API_BASE    = 'https://marque.ink/api';
+    const SUPABASE_URL = 'https://ekokbndwfwiygolwycia.supabase.co';
+    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVrb2tibmR3ZndpeWdvbHd5Y2lhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQwNDA0OTMsImV4cCI6MjA4OTYxNjQ5M30.5eghZZvrKXYxLD4YtC4a_ltc8DSQYHzmByccmTy9sRo';
+    const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    const EMOJIS = { books: '📚', films: '🎬', albums: '🎵', tv: '📺' };
+    const CAT_LABELS = { books: 'Books', films: 'Films', albums: 'Albums', tv: 'TV shows' };
+    const AVATAR_CLASSES = { blue: 'avatar-blue', green: 'avatar-green', amber: 'avatar-amber', red: 'avatar-red' };
+
+    const params = new URLSearchParams(location.search);
+    let handle = params.get('u');
+    let requestedCat = params.get('cat');
+
+    // When accessed via /@handle/cat (Nginx rewrite), browser URL keeps the path
+    if (!handle) {
+      const match = location.pathname.match(/^\/@([^/]+)\/?([^/]*)?$/);
+      if (match) {
+        handle = match[1] || null;
+        requestedCat = requestedCat || match[2] || null;
+      }
+    }
+
+    function initials(name) {
+      return (name || '?').split(' ').map(n => n[0]).join('').slice(0, 2);
+    }
+
+    function escHtml(s) {
+      return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    }
+
+    function showList(lists, user, cat) {
+      const items = lists[cat] || [];
+      const label = document.getElementById('list-label');
+      label.textContent = `Top ${items.length} ${CAT_LABELS[cat] || cat}`;
+      label.style.display = '';
+
+      document.getElementById('list-items').innerHTML = items.length
+        ? items.map((item, i) => `
+          <div class="list-item">
+            <div class="rank">${i + 1}</div>
+            <div class="thumb">
+              ${item.thumb
+                ? `<img src="${escHtml(item.thumb)}" alt="" onerror="this.parentElement.innerHTML='${EMOJIS[cat]}'"/>`
+                : EMOJIS[cat]}
+            </div>
+            <div>
+              <div class="item-title">${escHtml(item.title)}</div>
+              ${item.meta ? `<div class="item-meta">${escHtml(item.meta)}</div>` : ''}
+            </div>
+          </div>`).join('')
+        : `<div class="empty">No public ${CAT_LABELS[cat] || cat} yet.</div>`;
+    }
+
+    async function init() {
+      if (!handle) {
+        document.getElementById('list-items').innerHTML = '<div class="empty">No profile specified.</div>';
+        return;
+      }
+
+      let data;
+      try {
+        const res = await fetch(`${API_BASE}/lists/${handle}`);
+        if (!res.ok) throw new Error(res.status);
+        data = await res.json();
+      } catch {
+        document.getElementById('list-items').innerHTML = '<div class="empty">Profile not found.</div>';
+        return;
+      }
+
+      // Fetch user info
+      let user = { display_name: handle, handle, avatar_color: 'blue' };
+      try {
+        const { data: userData } = await sb.from('users')
+          .select('display_name, avatar_color')
+          .eq('handle', handle)
+          .single();
+        if (userData) {
+          user.display_name = userData.display_name;
+          user.avatar_color = userData.avatar_color || 'blue';
+        }
+      } catch {}
+
+      // Build profile header (display name may not be available unauthenticated — use handle)
+      const profileHead = document.getElementById('profile-head');
+      const avClass = AVATAR_CLASSES[user.avatar_color] || 'avatar-blue';
+      profileHead.innerHTML = `
+        <div class="avatar ${avClass}">${escHtml(initials(user.display_name))}</div>
+        <div>
+          <div class="profile-name">${escHtml(user.display_name)}</div>
+          <div class="profile-handle">@${escHtml(handle)}</div>
+        </div>`;
+      profileHead.style.display = '';
+
+      // Figure out which cats have public data
+      const publicCats = ['books', 'films', 'albums', 'tv'].filter(c => data[c]?.length > 0);
+
+      if (!publicCats.length) {
+        document.getElementById('list-items').innerHTML = '<div class="empty">No public lists yet.</div>';
+        document.getElementById('cta-footer').style.display = '';
+        return;
+      }
+
+      // Tabs
+      const activeCat = publicCats.includes(requestedCat) ? requestedCat : publicCats[0];
+      const tabsEl = document.getElementById('tabs');
+      tabsEl.innerHTML = publicCats.map(c => `
+        <a class="tab ${c === activeCat ? 'active' : ''}" href="/@${encodeURIComponent(handle)}/${c}">${CAT_LABELS[c]}</a>
+      `).join('');
+      tabsEl.style.display = '';
+
+      // Update page title
+      document.title = `@${handle} — Marque.ink`;
+
+      showList(data, user, activeCat);
+      document.getElementById('cta-footer').style.display = '';
+    }
+
+    init();
+  </script>
+</body>
+</html>
